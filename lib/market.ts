@@ -35,6 +35,11 @@ export async function fetchMarketData(countryCode: string = 'CO'): Promise<Marke
     const data = await response.json()
     const results = data.quoteResponse?.result || []
     
+    // Si la API retorna un array vacío (debido a error 429 en el servidor), forzar el fallback
+    if (results.length === 0) {
+      throw new Error('Empty market results')
+    }
+    
     const quotesBySymbol = results.reduce((acc: any, quote: any) => {
       acc[quote.symbol] = quote
       return acc

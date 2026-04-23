@@ -133,7 +133,16 @@ export async function GET(request: Request) {
       query = query.eq('country_code', country)
     }
 
-    const { data: dbArticles, error: dbError } = await query
+    let dbArticles: any[] | null = null
+    let dbError: any = null
+
+    try {
+      const result = await query
+      dbArticles = result.data
+      dbError = result.error
+    } catch (e: any) {
+      console.warn('⚠️ Supabase network error (fallback to GDELT):', e.message)
+    }
 
     if (dbError) {
       console.warn('⚠️ Supabase query warning:', dbError.message)
@@ -266,9 +275,13 @@ export async function GET(request: Request) {
     }
   } catch (error: any) {
     console.error('❌ Feed API Critical Error:', error)
+    // Never return 500, always return empty array gracefully to prevent UI crash
     return NextResponse.json({
-      error: 'Critical error in the news engine.',
+      articles: [],
+      hasMore: false,
+      source: 'error',
+      message: 'Error crítico en el motor de noticias.',
       details: error.message || 'Unknown error',
-    }, { status: 500 })
+    })
   }
 }
