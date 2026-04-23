@@ -19,6 +19,12 @@ const groq = createOpenAI({
   apiKey: process.env.GROQ_API_KEY,
 })
 
+// 3. OpenRouter (Fallback 2)
+const openrouter = createOpenAI({
+  baseURL: 'https://openrouter.ai/api/v1',
+  apiKey: process.env.OPENROUTER_API_KEY,
+})
+
 // Validation schema for the LLM response
 const AnalysisSchema = z.object({
   title_neutralized: z.string().describe('A completely neutral, objective version of the article headline.'),
@@ -115,19 +121,29 @@ RESPONDE SIEMPRE EN ESPAÑOL.`
 
     try {
       result = await generateObject({
-        model: cerebras('llama-3.1-70b'),
+        model: cerebras('llama3.1-70b'),
         schema: AnalysisSchema,
         system: systemPrompt,
         prompt: userPrompt,
       });
     } catch (e) {
-      console.warn("Cerebras failed, falling back to Groq");
-      result = await generateObject({
-        model: groq('llama-3.3-70b-versatile'),
-        schema: AnalysisSchema,
-        system: systemPrompt,
-        prompt: userPrompt,
-      });
+      console.warn("Cerebras failed, falling back to Groq:", e);
+      try {
+        result = await generateObject({
+          model: groq('llama-3.1-70b-versatile'),
+          schema: AnalysisSchema,
+          system: systemPrompt,
+          prompt: userPrompt,
+        });
+      } catch (e2) {
+        console.warn("Groq failed, falling back to OpenRouter:", e2);
+        result = await generateObject({
+          model: openrouter('meta-llama/llama-3.1-70b-instruct'),
+          schema: AnalysisSchema,
+          system: systemPrompt,
+          prompt: userPrompt,
+        });
+      }
     }
 
     const { object: analysis } = result;
