@@ -376,6 +376,7 @@ export function MediaDashboardClient({
                     </button>
                   )
                 })}
+                </div>
               </motion.div>
             ) : (
               <motion.div
