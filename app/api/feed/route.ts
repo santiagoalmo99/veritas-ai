@@ -19,55 +19,55 @@ function buildGdeltQuery(country: string, category: string): string {
   if (category !== 'ALL') {
     const categoryKeywords: Record<string, Record<string, string>> = {
       spanish: {
-        politics: 'política gobierno',
-        economy: 'economía finanzas mercados',
-        tech: 'tecnología inteligencia artificial',
-        science: 'ciencia investigación',
-        health: 'salud medicina',
-        environment: 'medio ambiente clima',
-        culture: 'cultura arte',
-        sports: 'deportes fútbol',
-        security: 'seguridad crimen',
-        international: 'internacional geopolítica',
-        entertainment: 'entretenimiento cine',
-        education: 'educación universidades',
-        justice: 'justicia tribunal',
+        politics: 'política',
+        economy: 'economía',
+        tech: 'tecnología',
+        science: 'ciencia',
+        health: 'salud',
+        environment: 'clima',
+        culture: 'cultura',
+        sports: 'deportes',
+        security: 'seguridad',
+        international: 'internacional',
+        entertainment: 'entretenimiento',
+        education: 'educación',
+        justice: 'justicia',
         human_rights: 'derechos humanos',
-        elections: 'elecciones votación',
+        elections: 'elecciones',
       },
       english: {
-        politics: 'politics government',
-        economy: 'economy finance markets',
-        tech: 'technology artificial intelligence',
-        science: 'science research',
-        health: 'health medicine',
-        environment: 'environment climate',
-        culture: 'culture arts',
-        sports: 'sports football soccer',
-        security: 'security crime',
-        international: 'international geopolitics',
-        entertainment: 'entertainment cinema',
-        education: 'education university',
-        justice: 'justice court',
+        politics: 'politics',
+        economy: 'economy',
+        tech: 'technology',
+        science: 'science',
+        health: 'health',
+        environment: 'climate',
+        culture: 'culture',
+        sports: 'sports',
+        security: 'security',
+        international: 'international',
+        entertainment: 'entertainment',
+        education: 'education',
+        justice: 'justice',
         human_rights: 'human rights',
-        elections: 'elections voting',
+        elections: 'elections',
       },
       portuguese: {
-        politics: 'política governo',
-        economy: 'economia finanças',
-        tech: 'tecnologia inteligência artificial',
-        science: 'ciência pesquisa',
-        health: 'saúde medicina',
-        environment: 'meio ambiente clima',
-        culture: 'cultura arte',
-        sports: 'esportes futebol',
-        security: 'segurança crime',
-        international: 'internacional geopolítica',
-        entertainment: 'entretenimento cinema',
-        education: 'educação universidade',
-        justice: 'justiça tribunal',
+        politics: 'política',
+        economy: 'economia',
+        tech: 'tecnologia',
+        science: 'ciência',
+        health: 'saúde',
+        environment: 'clima',
+        culture: 'cultura',
+        sports: 'esportes',
+        security: 'segurança',
+        international: 'internacional',
+        entertainment: 'entretenimento',
+        education: 'educação',
+        justice: 'justiça',
         human_rights: 'direitos humanos',
-        elections: 'eleições votação',
+        elections: 'eleições',
       },
     }
 
@@ -95,14 +95,20 @@ function getContentLanguage(country: string): string {
 
 export async function GET(request: Request) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-  if (!supabaseUrl || !supabaseServiceRoleKey) {
+  if (!supabaseUrl || !supabaseKey) {
     console.error('❌ Missing Supabase environment variables')
-    return NextResponse.json({ error: 'Database credentials not configured' }, { status: 500 })
+    // Return empty state gracefully instead of 500 so UI doesn't crash
+    return NextResponse.json({ 
+      articles: [], 
+      hasMore: false, 
+      source: 'gdelt_empty',
+      message: 'Faltan variables de entorno de Supabase en Vercel.' 
+    })
   }
 
-  const supabase = createClient(supabaseUrl, supabaseServiceRoleKey)
+  const supabase = createClient(supabaseUrl, supabaseKey)
 
   try {
     const { searchParams } = new URL(request.url)
@@ -159,9 +165,13 @@ export async function GET(request: Request) {
     })
 
     try {
-      const gdeltRes = await fetch(`${GDELT_API_URL}?${gdeltParams.toString()}`, {
-        signal: AbortSignal.timeout(10000), // 10s timeout (down from 45s)
+      // Bulletproof timeout using Promise.race (avoids AbortSignal edge cases)
+      const fetchPromise = fetch(`${GDELT_API_URL}?${gdeltParams.toString()}`)
+      const timeoutPromise = new Promise<Response>((_, reject) => {
+        setTimeout(() => reject(new Error('GDELT Timeout')), 6000)
       })
+      
+      const gdeltRes = await Promise.race([fetchPromise, timeoutPromise])
 
       if (!gdeltRes.ok) {
         throw new Error(`GDELT API responded with ${gdeltRes.status}`)
