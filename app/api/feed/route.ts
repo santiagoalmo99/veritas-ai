@@ -15,7 +15,7 @@ export async function GET(request: Request) {
 
   try {
     const { searchParams } = new URL(request.url)
-    const category = searchParams.get('category') || searchParams.get('topic') || 'ALL'
+    const category = searchParams.get('category') || searchParams.get('topics') || searchParams.get('topic') || 'ALL'
     const country = searchParams.get('country') || searchParams.get('countryCode') || 'ALL'
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('perPage') || '12')
@@ -29,7 +29,8 @@ export async function GET(request: Request) {
       .range(offset, offset + limit - 1)
 
     if (category !== 'ALL') {
-      query = query.eq('category', category.toLowerCase())
+      const categoryList = category.toLowerCase().split(',')
+      query = query.in('category', categoryList)
     }
     if (country !== 'ALL') {
       query = query.eq('country_code', country)
