@@ -110,9 +110,14 @@ export async function GET(request: Request) {
       })
 
       // Upsert asíncrono para que no bloquee la respuesta
-      supabase.from('articles').upsert(articles).then(() => {
-        console.log('✅ DB poblada automáticamente con noticias de GDELT.')
-      }).catch(e => console.error('Error in background upsert:', e))
+      void (async () => {
+        try {
+          await supabase.from('articles').upsert(articles)
+          console.log('✅ DB poblada automáticamente con noticias de GDELT.')
+        } catch (e) {
+          console.error('Error in background upsert:', e)
+        }
+      })()
 
       return NextResponse.json({
         articles,
