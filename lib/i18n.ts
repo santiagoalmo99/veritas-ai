@@ -21,7 +21,8 @@ export const TRANSLATIONS = {
     regionLanguage: 'Región / Idioma',
     
     // Feed
-    live: 'En vivo',
+    live: 'Live',
+    archived: 'Veritas',
     feedTitle: 'Noticias de hoy',
     feedDescription: 'Cada artículo pasa por un análisis forense multi-agente que detecta técnicas de manipulación documentadas académicamente.',
     sources: '400K arts/día',
@@ -165,6 +166,7 @@ export const TRANSLATIONS = {
 
     // Feed
     live: 'Live',
+    archived: 'Veritas',
     feedTitle: "Today's News",
     feedDescription: 'Each article undergoes a multi-agent forensic analysis to detect academically documented manipulation techniques.',
     sources: '400K arts/day',
