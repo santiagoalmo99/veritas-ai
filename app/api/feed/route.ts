@@ -116,9 +116,12 @@ async function fetchRssFallback(lang: string, country: string) {
       let excerpt = descMatch ? descMatch[1].replace(/<[^>]+>/g, '').trim().slice(0, 160) : ''
       if (excerpt && !excerpt.endsWith('.')) excerpt += '...'
       const image_url = imgMatch ? imgMatch[1] : null
+      
+      // Encode URL in ID to make it reconstructible in the detail page if not in DB
+      const encodedUrl = Buffer.from(articleUrl).toString('base64url')
 
       return mapToArticle({
-        id: `rss-${Date.now()}-${i}`,
+        id: `rss-${encodedUrl}`,
         url: articleUrl,
         title,
         excerpt,
@@ -272,13 +275,9 @@ export async function GET(request: Request) {
 
       // 4. Map GDELT articles to our schema (WITHOUT outlet_id to avoid FK violations)
       const articles = rawArticles.map((art: any) => {
-        // Simple edge-compatible hash for ID
-        let hash = 0;
-        for (let i = 0; i < art.url.length; i++) {
-          hash = ((hash << 5) - hash) + art.url.charCodeAt(i);
-          hash = hash & hash;
-        }
-        const articleId = `gdelt-${Math.abs(hash)}-${Date.now()}`;
+        // Encode URL in ID to make it reconstructible in the detail page
+        const encodedUrl = Buffer.from(art.url).toString('base64url')
+        const articleId = `gdelt-${encodedUrl}`;
         const rawDate = art.seendate || ''
         let publishedAt = new Date().toISOString()
 

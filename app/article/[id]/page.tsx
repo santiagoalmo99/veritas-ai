@@ -23,10 +23,11 @@ async function resolveArticle(id: string): Promise<Article | null> {
     console.error('[article/page] supabase resolve error:', err)
   }
 
-  // 3. Reconstrucción dinámica para GDELT (si el ID contiene la URL en base64)
-  if (baseId.startsWith('gdelt-')) {
+  // 3. Reconstrucción dinámica para GDELT/RSS (si el ID contiene la URL en base64)
+  if (baseId.startsWith('gdelt-') || baseId.startsWith('rss-')) {
     try {
-      const encodedUrl = baseId.replace('gdelt-', '')
+      const type = baseId.startsWith('gdelt-') ? 'gdelt-' : 'rss-'
+      const encodedUrl = baseId.replace(type, '')
       const url = Buffer.from(encodedUrl, 'base64url').toString()
       const domain = new URL(url).hostname.replace('www.', '')
       
@@ -48,7 +49,7 @@ async function resolveArticle(id: string): Promise<Article | null> {
         analysisStatus: 'pending' // Esto disparará el hook useAnalysis en el cliente
       } as Article
     } catch (e) {
-      console.error('[resolveArticle] GDELT decode error:', e)
+      console.error('[resolveArticle] dynamic decode error:', e)
     }
   }
 
