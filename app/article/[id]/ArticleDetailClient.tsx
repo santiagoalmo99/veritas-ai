@@ -30,7 +30,7 @@ export function ArticleDetailClient({ article: initialArticle }: { article: Arti
   const [showNeutralized, setShowNeutralized] = useState(false)
   const isEn = initialArticle.language === 'en'
 
-  const { result, loading, phaseLabel, progressMs, analyze } = useAnalysis(initialArticle)
+  const { result, loading, phaseLabel, progressMs, analyze, error } = useAnalysis(initialArticle)
   const article = (result as Article) ?? initialArticle
   const needsAnalysis = article.analysisStatus === 'pending' || article.analysisStatus === undefined
 
