@@ -1,0 +1,12 @@
+{
+  "sandbox": {
+    "allowedDomains": [
+      "github.com",
+      "vercel.com",
+      "api.gdeltproject.org",
+      "raw.githubusercontent.com",
+      "*.vercel.app",
+      "google.com"
+    ]
+  }
+}

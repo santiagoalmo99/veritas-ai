@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 export const dynamic = 'force-dynamic'
 import { createClient } from '@supabase/supabase-js'
-import { TECHNIQUES, MEDIA_OUTLETS, MOCK_ARTICLES } from '@/lib/mock-data'
+import { TECHNIQUES, MEDIA_OUTLETS } from '@/lib/mock-data'
 
 export async function GET() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -80,65 +80,8 @@ export async function GET() {
     )
     if (journoError) throw journoError
 
-    // 4. Seed Articles
-    logs.push('Inserting Articles...')
-    for (const article of MOCK_ARTICLES) {
-      const { error: articleError } = await supabase.from('articles').upsert({
-        id: article.id,
-        url: article.url,
-        title: article.title,
-        title_neutralized: article.titleNeutralized || null,
-        excerpt: article.excerpt,
-        image_url: article.imageUrl || null,
-        outlet_id: article.outlet.id,
-        journalist: article.journalist || null,
-        journalist_score: article.journalistScore || null,
-        published_at: article.publishedAt,
-        category: article.category,
-        country_code: article.countryCode,
-        language: article.language,
-        veritas_score: article.veritasScore || null,
-        analysis_status: article.analysisStatus,
-        analysis_confidence: article.analysisConfidence || null,
-        view_count: article.viewCount,
-        trending_score: article.trendingScore,
-        summary_neutralized: article.summaryNeutralized || null,
-        content_neutralized: article.contentNeutralized || null,
-        primary_intent: article.primaryIntent || null,
-        tags: article.tags,
-        content: article.content || null
-      })
-      if (articleError) throw articleError
-
-      if ((article.techniquesDetected?.length ?? 0) > 0) {
-        await supabase.from('article_techniques').delete().eq('article_id', article.id)
-        const { error: techLinkError } = await supabase.from('article_techniques').insert(
-          article.techniquesDetected.map(td => ({
-            article_id: article.id,
-            technique_id: td.technique.id,
-            quote: td.quote,
-            confidence: td.confidence,
-            explanation: td.explanation
-          }))
-        )
-        if (techLinkError) throw techLinkError
-      }
-
-      if ((article.analysisLogs?.length ?? 0) > 0) {
-        await supabase.from('article_analysis_logs').delete().eq('article_id', article.id)
-        const { error: logError } = await supabase.from('article_analysis_logs').insert(
-          (article.analysisLogs || []).map(log => ({
-            article_id: article.id,
-            step_id: log.stepId,
-            status: log.status,
-            timestamp_val: log.timestamp,
-            technical_detail: log.technicalDetail,
-            technical_detail_es: log.technicalDetailEs
-          }))
-        )
-        if (logError) throw logError
-      }
-    }
+    // 4. Seed Articles (Skipped)
+    logs.push('Skipping mock articles insertion to maintain real-data policy.')
 
     logs.push('Seed completed successfully!')
     return NextResponse.json({ success: true, logs })

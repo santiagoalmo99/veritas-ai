@@ -111,7 +111,8 @@ export function NewsCard({ article, index = 0 }: NewsCardProps) {
               "w-full py-2.5 px-4 rounded-md font-ui text-xs font-bold tracking-wide uppercase transition-all duration-300 flex items-center justify-center gap-2",
               isNeutralized 
                 ? "bg-[var(--score-high-text)]/10 text-[var(--score-high-text)] border border-[var(--score-high-text)]/30" 
-                : "bg-[var(--color-surface-1)] hover:bg-[var(--color-surface-3)] text-[var(--color-text-primary)] border border-[var(--color-border)] shadow-sm"
+                : "bg-[var(--color-surface-1)] hover:bg-[var(--color-surface-3)] text-[var(--color-text-primary)] border border-[var(--color-border)] shadow-sm",
+              "relative z-30 pointer-events-auto"
             )}
           >
             {isNeutralized ? (
@@ -131,8 +132,9 @@ export function NewsCard({ article, index = 0 }: NewsCardProps) {
       spanClass, 
       isHorizontal ? "flex-col md:flex-row overflow-visible" : "flex-col overflow-hidden"
     )}>
+      <Link href={`/article/${article.id}`} className="absolute inset-0 z-20 cursor-pointer" aria-label={`Read ${article.title}`} />
       <div className={cn(
-        "relative w-full shrink-0 bg-[#0c0c0e] pointer-events-auto border-[var(--color-border)] overflow-hidden",
+        "relative w-full shrink-0 bg-[#0c0c0e] border-[var(--color-border)] overflow-hidden",
         isHorizontal ? "md:w-[45%] lg:w-[40%] min-h-[300px] md:min-h-full border-b md:border-b-0" : "aspect-[16/10] border-b",
         isHorizontal && imagePos === 'right' ? "md:order-2 md:border-l" : "md:order-1 md:border-r"
       )}>
@@ -157,10 +159,9 @@ export function NewsCard({ article, index = 0 }: NewsCardProps) {
       </div>
 
       <div className={cn(
-        "p-5 sm:p-6 flex flex-col flex-1 pointer-events-auto relative z-10",
+        "p-5 sm:p-6 flex flex-col flex-1 relative z-10",
         isHorizontal && imagePos === 'right' ? "md:order-1" : "md:order-2"
       )}>
-        <Link href={`/article/${article.id}`} className="absolute inset-0 z-0" aria-label={`Read ${article.title}`} />
         <ArticleMeta publishedAt={article.publishedAt} language={language} />
         <h2 className={cn(
           "font-display font-medium leading-tight tracking-tight group-hover/card:text-[var(--color-accent)] transition-all duration-500 mb-3 relative z-10",
@@ -190,7 +191,7 @@ export function NewsCard({ article, index = 0 }: NewsCardProps) {
               </div>
             )}
           </div>
-          <div className="flex items-center gap-3 text-[var(--color-text-tertiary)]">
+          <div className="flex items-center gap-3 text-[var(--color-text-tertiary)] relative z-30 pointer-events-auto">
             <Heart size={14} className="hover:text-red-500 transition-colors cursor-pointer" />
             <MoreHorizontal size={14} className="hover:text-[var(--color-text-primary)] transition-colors cursor-pointer" />
           </div>

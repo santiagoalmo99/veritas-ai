@@ -82,35 +82,12 @@ export function useGdeltFeed({
       setPage(data.nextPage ?? pageNum + 1)
     } catch (err) {
       console.error('[useGdeltFeed]', err)
-      // Fallback to mock feed
-      const { simulateInfiniteScroll } = await import('@/lib/mock-data')
-      const result = simulateInfiniteScroll(pageNum, perPage, country, topicList)
-      
-      setState((s) => {
-        if (reset) {
-          return {
-            ...s,
-            articles: result.articles,
-            hasMore: result.hasMore,
-            loading: false,
-            initialLoading: false,
-            source: 'mock',
-            error: 'Usando datos de demostración (GDELT no disponible)',
-          }
-        }
-        const existingIds = new Set(s.articles.map(a => a.id))
-        const uniqueNew = result.articles.filter(a => !existingIds.has(a.id))
-        return {
-          ...s,
-          articles: [...s.articles, ...uniqueNew],
-          hasMore: result.hasMore,
-          loading: false,
-          initialLoading: false,
-          source: 'mock',
-          error: 'Usando datos de demostración (GDELT no disponible)',
-        }
-      })
-      setPage(result.nextPage)
+      setState((s) => ({
+        ...s,
+        loading: false,
+        initialLoading: false,
+        error: 'No se pudieron cargar noticias reales. Verifica tu conexión.',
+      }))
     }
   }, [countryCode, topics, perPage])
 

@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -33,6 +33,13 @@ export function ArticleDetailClient({ article: initialArticle }: { article: Arti
   const { result, loading, phaseLabel, progressMs, analyze } = useAnalysis(initialArticle)
   const article = (result as Article) ?? initialArticle
   const needsAnalysis = article.analysisStatus === 'pending' || article.analysisStatus === undefined
+
+  // Auto-trigger analysis if pending
+  useEffect(() => {
+    if (needsAnalysis && !loading && article.url) {
+      analyze()
+    }
+  }, [needsAnalysis, loading, article.url, analyze])
 
   // Localized Labels
   const labels = {
