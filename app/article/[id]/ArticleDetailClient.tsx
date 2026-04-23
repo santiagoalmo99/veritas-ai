@@ -92,6 +92,15 @@ export function ArticleDetailClient({ article: initialArticle }: { article: Arti
         </Link>
       </motion.div>
 
+      {/* Error State */}
+      {error && (
+        <div className="mb-8 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-sm flex items-center gap-3">
+          <AlertCircle size={18} />
+          <span>{isEn ? "Analysis failed: " : "El análisis falló: "} {error}</span>
+          <button onClick={() => analyze()} className="ml-auto underline font-bold">Retry</button>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-16 items-start">
         
         {/* ── Main Column (Editorial) ──────────────────────────── */}
