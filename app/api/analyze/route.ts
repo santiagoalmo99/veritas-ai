@@ -37,7 +37,9 @@ const AnalysisSchema = z.object({
 
 export async function POST(req: Request) {
   try {
-    let { url, outletName, outletDomain } = await req.json()
+    const body = await req.json().catch(() => ({}))
+    const { url, outletName, outletDomain, title: bodyTitle, excerpt: bodyExcerpt } = body
+    
     if (!url) {
       return NextResponse.json({ error: 'Missing url' }, { status: 400 })
     }
@@ -57,20 +59,38 @@ export async function POST(req: Request) {
     }, { onConflict: 'id' })
 
     // 1. Scrape Article Content
-    const response = await fetch(url, { headers: { 'User-Agent': 'VeritasAI-Bot/1.0' } })
-    if (!response.ok) throw new Error('Failed to fetch article URL')
+    let title = ''
+    let content = ''
     
-    const html = await response.text()
-    const $ = cheerio.load(html)
+    try {
+      const response = await fetch(url, { 
+        headers: { 
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8'
+        },
+        next: { revalidate: 3600 }
+      })
+      
+      if (response.ok) {
+        const html = await response.text()
+        const $ = cheerio.load(html)
+        
+        // Clean up unnecessary elements
+        $('script, style, nav, footer, header, aside, .ad, .advertisement, iframe').remove()
+        
+        title = $('h1').first().text().trim() || $('title').text().trim()
+        content = $('p').map((i, el) => $(el).text().trim()).get().join('\n\n').substring(0, 10000)
+      }
+    } catch (e) {
+      console.warn('Scraper failed, using fallback from request body:', e)
+    }
+
+    // Fallback to provided metadata if scraping failed or returned nothing
+    title = title || bodyTitle || 'Noticia Sin Título'
+    content = (content && content.length > 200) ? content : (bodyExcerpt || title)
     
-    // Clean up unnecessary elements
-    $('script, style, nav, footer, header, aside, .ad, .advertisement').remove()
-    
-    const title = $('h1').first().text().trim() || $('title').text().trim()
-    const content = $('p').map((i, el) => $(el).text().trim()).get().join('\n\n').substring(0, 8000)
-    
-    if (!content || content.length < 200) {
-      return NextResponse.json({ error: 'Content too short or unreadable' }, { status: 400 })
+    if (content.length < 50) {
+      return NextResponse.json({ error: 'Insuficiente contenido para analizar.' }, { status: 400 })
     }
 
     // 2. Perform AI Forensic Analysis with Cascade

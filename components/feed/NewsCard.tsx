@@ -86,15 +86,10 @@ export function NewsCard({ article, index = 0 }: NewsCardProps) {
         
         <div className="mb-4 pl-3 border-l-2 border-[var(--color-border)]">
           <p className="font-ui text-sm text-[var(--color-text-primary)] leading-relaxed m-0">
-            {article.analysisStatus === 'completed' 
-              ? (article.summaryNeutralized || article.excerpt)
-              : (hasManipulation 
-                  ? (isEn 
-                      ? `Initial forensic scan detects patterns of emotional framing and narrative anchoring. Full manipulation report will be available upon detailed deep-scan.`
-                      : `El escaneo forense inicial detecta patrones de encuadre emocional y anclaje narrativo. El reporte de manipulación completo estará disponible tras el análisis detallado.`)
-                  : (isEn
-                      ? `Preliminary analysis suggests a standard informational structure. Low probability of high-impact cognitive bias detected in the current metadata.`
-                      : `El análisis preliminar sugiere una estructura informativa estándar. Baja probabilidad de sesgo cognitivo de alto impacto detectada en los metadatos actuales.`))}
+            {article.analysisStatus === 'completed' && article.summaryNeutralized
+              ? article.summaryNeutralized
+              : (article.excerpt || 'Cargando contenido...')
+            }
           </p>
         </div>
 
