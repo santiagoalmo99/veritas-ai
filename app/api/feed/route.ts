@@ -15,10 +15,10 @@ export async function GET(request: Request) {
 
   try {
     const { searchParams } = new URL(request.url)
-    const category = searchParams.get('category') || 'ALL'
-    const countryCode = searchParams.get('countryCode') || 'ALL'
+    const category = searchParams.get('category') || searchParams.get('topic') || 'ALL'
+    const country = searchParams.get('country') || searchParams.get('countryCode') || 'ALL'
     const page = parseInt(searchParams.get('page') || '1')
-    const limit = 12
+    const limit = parseInt(searchParams.get('perPage') || '12')
     const offset = (page - 1) * limit
 
     // 1. Intentar obtener noticias de la Base de Datos (Supabase)
@@ -31,8 +31,8 @@ export async function GET(request: Request) {
     if (category !== 'ALL') {
       query = query.eq('category', category.toLowerCase())
     }
-    if (countryCode !== 'ALL') {
-      query = query.eq('country_code', countryCode)
+    if (country !== 'ALL') {
+      query = query.eq('country_code', country)
     }
 
     const { data: dbArticles, error: dbError } = await query
@@ -99,7 +99,7 @@ export async function GET(request: Request) {
         analysis_status: 'pending',
         trending_score: Math.random(),
         language: 'es',
-        country_code: countryCode === 'ALL' ? 'ES' : countryCode
+        country_code: country === 'ALL' ? 'ES' : country
       }
     })
 
