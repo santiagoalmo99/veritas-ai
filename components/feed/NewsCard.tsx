@@ -86,13 +86,15 @@ export function NewsCard({ article, index = 0 }: NewsCardProps) {
         
         <div className="mb-4 pl-3 border-l-2 border-[var(--color-border)]">
           <p className="font-ui text-sm text-[var(--color-text-primary)] leading-relaxed m-0">
-            {hasManipulation 
-              ? (isEn 
-                  ? `This content presents a high risk of cognitive manipulation. The outlet is structuring information using persuasive tactics like ${topTechniques.map(t => t.technique.name).join(', ')} to direct the reader's emotional response rather than presenting facts objectively.`
-                  : `Este contenido presenta un alto riesgo de manipulación cognitiva. El medio está estructurando la información mediante tácticas persuasivas como ${topTechniques.map(t => t.technique.name.toLowerCase()).join(', ')} para dirigir la respuesta emocional del lector en lugar de presentar los hechos objetivamente.`)
-              : (isEn
-                  ? `This content maintains a factual and balanced informational structure. No algorithmic patterns oriented towards moral outrage or evident cognitive bias are detected. Editorial rigor is high.`
-                  : `Este contenido mantiene una estructura informativa fáctica y equilibrada. No se detectan patrones algorítmicos orientados a la indignación moral o sesgo cognitivo evidente. El rigor editorial es alto.`)}
+            {article.analysisStatus === 'completed' 
+              ? (article.summaryNeutralized || article.excerpt)
+              : (hasManipulation 
+                  ? (isEn 
+                      ? `Initial forensic scan detects patterns of emotional framing and narrative anchoring. Full manipulation report will be available upon detailed deep-scan.`
+                      : `El escaneo forense inicial detecta patrones de encuadre emocional y anclaje narrativo. El reporte de manipulación completo estará disponible tras el análisis detallado.`)
+                  : (isEn
+                      ? `Preliminary analysis suggests a standard informational structure. Low probability of high-impact cognitive bias detected in the current metadata.`
+                      : `El análisis preliminar sugiere una estructura informativa estándar. Baja probabilidad de sesgo cognitivo de alto impacto detectada en los metadatos actuales.`))}
           </p>
         </div>
 

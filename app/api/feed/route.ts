@@ -95,9 +95,20 @@ function getContentLanguage(country: string): string {
 
 // ── Ultimate RSS Fallback (Zero-Dependency) ───────────────────
 async function fetchRssFallback(lang: string, country: string) {
-  let url = 'https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/portada'
-  if (lang === 'en') url = 'http://feeds.bbci.co.uk/news/rss.xml'
-  if (lang === 'pt') url = 'https://g1.globo.com/rss/g1/'
+  // RSS Fallback sources by language/country
+  const feedLang = country === 'BR' ? 'pt' : (country === 'USA' || country === 'GB' || country === 'US') ? 'en' : 'es'
+  
+  const rssFeeds: Record<string, string> = {
+    es: 'https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/portada',
+    en: 'https://feeds.bbci.co.uk/news/world/rss.xml',
+    pt: 'https://g1.globo.com/rss/g1/',
+  }
+
+  // Override with country-specific if available
+  let url = rssFeeds[feedLang]
+  if (country === 'CO') url = 'https://www.eltiempo.com/rss/colombia.xml'
+  if (country === 'USA' || country === 'US') url = 'http://rss.cnn.com/rss/cnn_topstories.rss'
+  if (country === 'ES') url = 'https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/portada'
 
   try {
     const res = await fetch(url, { next: { revalidate: 300 } })
@@ -133,8 +144,8 @@ async function fetchRssFallback(lang: string, country: string) {
         country_code: country,
         // Mock outlet to satisfy UI without needing Supabase FK
         outlet: {
-           name: lang === 'en' ? 'BBC News' : lang === 'pt' ? 'G1 Globo' : 'El País',
-           domain: lang === 'en' ? 'bbc.co.uk' : lang === 'pt' ? 'globo.com' : 'elpais.com',
+           name: country === 'CO' ? 'El Tiempo' : country === 'USA' || country === 'US' ? 'CNN' : lang === 'en' ? 'BBC News' : lang === 'pt' ? 'G1 Globo' : 'El País',
+           domain: country === 'CO' ? 'eltiempo.com' : country === 'USA' || country === 'US' ? 'cnn.com' : lang === 'en' ? 'bbc.co.uk' : lang === 'pt' ? 'globo.com' : 'elpais.com',
            currentVeritasAvg: 65 + Math.floor(Math.random() * 20)
         }
       })
