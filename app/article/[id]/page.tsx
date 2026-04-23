@@ -33,8 +33,8 @@ async function resolveArticle(id: string): Promise<Article | null> {
       return {
         id: baseId,
         url: url,
-        title: "Cargando análisis forense...",
-        excerpt: "Este artículo proviene de una fuente externa en tiempo real. VeritasAI está analizando el contenido ahora mismo...",
+        title: "Analizando noticia...",
+        excerpt: "Extrayendo metadatos para auditoría forense...",
         publishedAt: new Date().toISOString(),
         outlet: {
           id: 'unknown',

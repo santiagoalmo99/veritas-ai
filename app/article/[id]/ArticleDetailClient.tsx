@@ -36,7 +36,7 @@ export function ArticleDetailClient({ article: initialArticle }: { article: Arti
   const article = result ? {
     ...initialArticle,
     ...result,
-    title: result.title || initialArticle.title,
+    title: (result.title && result.title !== "Cargando análisis forense...") ? result.title : (result.titleNeutralized || initialArticle.title),
     content: result.content || initialArticle.content
   } as Article : initialArticle
   const needsAnalysis = article.analysisStatus === 'pending' || article.analysisStatus === undefined
