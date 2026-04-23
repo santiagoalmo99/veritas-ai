@@ -227,7 +227,9 @@ Fragmento de texto: ${content.substring(0, 4500)}`
       summaryNeutralized: analysis.summary_neutralized,
       primaryIntent: analysis.primary_intent,
       tags: analysis.tags,
-      analysisLogs
+      analysisLogs,
+      title: title, // Returning original scraped title
+      content: content // Returning original scraped content
     })
 
   } catch (error: any) {
