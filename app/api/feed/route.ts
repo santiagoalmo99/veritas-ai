@@ -49,7 +49,7 @@ export async function GET(request: Request) {
     // 3. Si la DB está vacía (Bootstrap), le pedimos a GDELT en tiempo real
     console.log('🔄 DB Vacía. Solicitando datos reales a GDELT...')
     
-    const GDELT_API_URL = 'http://api.gdeltproject.org/api/v2/doc/doc'
+    const GDELT_API_URL = 'https://api.gdeltproject.org/api/v2/doc/doc'
     const gdeltParams = new URLSearchParams({
       format: 'json',
       timespan: '24h',
@@ -58,67 +58,81 @@ export async function GET(request: Request) {
       mode: 'artlist'
     })
 
-    const gdeltRes = await fetch(`${GDELT_API_URL}?${gdeltParams.toString()}`, {
-      next: { revalidate: 300 }, // Caché de 5 min
-      signal: AbortSignal.timeout(45000)
-    })
-
-    const gdeltData = await gdeltRes.json()
-    const rawArticles = gdeltData.articles || []
-
-    if (rawArticles.length === 0) {
-      return NextResponse.json({
-        articles: [],
-        hasMore: false,
-        source: 'gdelt_empty',
-        message: 'No hay noticias reales en las últimas 24h.'
+    try {
+      const gdeltRes = await fetch(`${GDELT_API_URL}?${gdeltParams.toString()}`, {
+        next: { revalidate: 300 }, // Caché de 5 min
+        signal: AbortSignal.timeout(45000)
       })
+
+      if (!gdeltRes.ok) {
+        throw new Error(`GDELT API responded with ${gdeltRes.status}`)
+      }
+
+      const gdeltData = await gdeltRes.json()
+      const rawArticles = gdeltData.articles || []
+
+      if (rawArticles.length === 0) {
+        return NextResponse.json({
+          articles: [],
+          hasMore: false,
+          source: 'gdelt_empty',
+          message: 'No hay noticias reales en las últimas 24h.'
+        })
+      }
+
+      // 4. Mapear e inyectar en la DB para futuras consultas (Autónomo)
+      const articles = rawArticles.map((art: any) => {
+        const articleId = Buffer.from(art.url).toString('base64url')
+        const rawDate = art.seendate || ''
+        let publishedAt = new Date().toISOString()
+        
+        if (rawDate.length >= 14) {
+          try {
+            publishedAt = new Date(
+              `${rawDate.slice(0, 4)}-${rawDate.slice(4, 6)}-${rawDate.slice(6, 8)}T${rawDate.slice(8, 10)}:${rawDate.slice(10, 12)}:${rawDate.slice(12, 14)}Z`
+            ).toISOString()
+          } catch (e) {}
+        }
+
+        return {
+          id: articleId,
+          url: art.url,
+          title: art.title,
+          excerpt: art.excerpt || 'Noticia real de 2026 capturada por VeritasAI.',
+          image_url: art.socialimage || null,
+          published_at: publishedAt,
+          analysis_status: 'pending',
+          trending_score: Math.random(),
+          language: 'es',
+          country_code: country === 'ALL' ? 'ES' : country
+        }
+      })
+
+      // Upsert asíncrono para que no bloquee la respuesta
+      supabase.from('articles').upsert(articles).then(() => {
+        console.log('✅ DB poblada automáticamente con noticias de GDELT.')
+      }).catch(e => console.error('Error in background upsert:', e))
+
+      return NextResponse.json({
+        articles,
+        hasMore: false,
+        source: 'gdelt_live'
+      })
+    } catch (gdeltError: any) {
+      console.error('❌ GDELT Fetch Error:', gdeltError)
+      return NextResponse.json({
+        error: 'Error al conectar con GDELT',
+        details: gdeltError.message,
+        source: 'gdelt_fail'
+      }, { status: 502 })
     }
 
-    // 4. Mapear e inyectar en la DB para futuras consultas (Autónomo)
-    const articles = rawArticles.map((art: any) => {
-      const articleId = Buffer.from(art.url).toString('base64url')
-      const rawDate = art.seendate || ''
-      let publishedAt = new Date().toISOString()
-      
-      if (rawDate.length >= 14) {
-        try {
-          publishedAt = new Date(
-            `${rawDate.slice(0, 4)}-${rawDate.slice(4, 6)}-${rawDate.slice(6, 8)}T${rawDate.slice(8, 10)}:${rawDate.slice(10, 12)}:${rawDate.slice(12, 14)}Z`
-          ).toISOString()
-        } catch (e) {}
-      }
-
-      return {
-        id: articleId,
-        url: art.url,
-        title: art.title,
-        excerpt: art.excerpt || 'Noticia real de 2026 capturada por VeritasAI.',
-        image_url: art.socialimage || null,
-        published_at: publishedAt,
-        analysis_status: 'pending',
-        trending_score: Math.random(),
-        language: 'es',
-        country_code: country === 'ALL' ? 'ES' : country
-      }
-    })
-
-    // Upsert asíncrono para que no bloquee la respuesta
-    supabase.from('articles').upsert(articles).then(() => {
-      console.log('✅ DB poblada automáticamente con noticias de GDELT.')
-    })
-
-    return NextResponse.json({
-      articles,
-      hasMore: false,
-      source: 'gdelt_live'
-    })
-
-  } catch (error) {
-    console.error('❌ Feed API Error:', error)
+  } catch (error: any) {
+    console.error('❌ Feed API Critical Error:', error)
     return NextResponse.json({ 
       error: 'Error crítico en el motor de noticias reales.',
-      details: error instanceof Error ? error.message : 'Unknown error'
+      details: error.message || 'Unknown error',
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
     }, { status: 500 })
   }
 }
