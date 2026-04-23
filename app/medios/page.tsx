@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+export const dynamic = 'force-dynamic'
 import { MediaDashboardClient } from './MediaDashboardClient'
 import { api } from '@/lib/api'
 

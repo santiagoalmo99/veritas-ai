@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+export const dynamic = 'force-dynamic'
 import { notFound } from 'next/navigation'
 import { getArticleById } from '@/lib/mock-data'
 import { ArticleDetailClient } from './ArticleDetailClient'

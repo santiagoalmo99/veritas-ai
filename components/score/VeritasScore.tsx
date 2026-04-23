@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils'
 
 interface VeritasScoreProps {
   score: number | undefined
-  size?: 'sm' | 'md' | 'lg'
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
   showLabel?: boolean
   animated?: boolean
   className?: string

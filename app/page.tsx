@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+export const dynamic = 'force-dynamic'
 import { Suspense } from 'react'
 import { InfiniteFeed } from '@/components/feed/InfiniteFeed'
 import { TopicBar } from '@/components/feed/TopicBar'

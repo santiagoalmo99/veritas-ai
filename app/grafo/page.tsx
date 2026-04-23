@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+export const dynamic = 'force-dynamic'
 import { GrafoClient } from './GrafoClient'
 import { api } from '@/lib/api'
 

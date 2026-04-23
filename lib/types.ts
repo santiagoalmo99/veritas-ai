@@ -47,7 +47,7 @@ export interface MediaOutlet {
   id: string
   name: string
   domain: string
-  logoUrl?: string
+  logoUrl?: string | null
   countryCode: string
   currentVeritasAvg: number
   articlesAnalyzed: number
@@ -55,7 +55,7 @@ export interface MediaOutlet {
   politicalBiasScore: number // -1 (izq) a +1 (der)
   reliabilityScore: number // 0 a 1
   topTechniques: string[] // Slugs de técnicas más frecuentes
-  credScore?: number // CRED-1
+  credScore?: number | null // CRED-1
 }
 
 export interface AnalysisLog {
@@ -70,35 +70,35 @@ export interface Article {
   id: string
   url: string
   title: string
-  titleNeutralized?: string
+  titleNeutralized?: string | null
   excerpt: string
-  imageUrl?: string
+  imageUrl?: string | null
   outlet: MediaOutlet
-  journalist?: string
-  journalistScore?: number // 0-100, puntuación individual del periodista
+  journalist?: string | null
+  journalistScore?: number | null // 0-100, puntuación individual del periodista
   publishedAt: string // ISO string
   category: ArticleCategory
   countryCode: string
   language: string
   
   // Scoring
-  veritasScore?: number // 0-100, undefined si no analizado
+  veritasScore?: number | null // 0-100, undefined si no analizado
   analysisStatus: 'pending' | 'processing' | 'completed' | 'failed'
-  analysisConfidence?: number // 0-1
+  analysisConfidence?: number | null // 0-1
   techniquesDetected: DetectedTechnique[]
-  analysisLogs?: AnalysisLog[] // Pasos detallados del Chain of Thought
+  analysisLogs?: AnalysisLog[] | null // Pasos detallados del Chain of Thought
   
   // Engagement
   viewCount: number
   trendingScore: number
 
   // Analysis extras
-  summaryNeutralized?: string
-  contentNeutralized?: string
-  primaryIntent?: 'inform' | 'persuade' | 'agitate' | 'deceive'
-  alternativeSources?: AlternativeSource[]
+  summaryNeutralized?: string | null
+  contentNeutralized?: string | null
+  primaryIntent?: 'inform' | 'persuade' | 'agitate' | 'deceive' | null
+  alternativeSources?: AlternativeSource[] | null
   tags: string[]
-  content?: string
+  content?: string | null
 }
 
 export interface AlternativeSource {
@@ -170,15 +170,16 @@ export interface GeolocationResult {
 }
 
 // Score utilities
-export function getScoreLevel(score: number): ScoreLevel {
-  if (score <= 20) return 'safe'
-  if (score <= 40) return 'mild'
-  if (score <= 60) return 'moderate'
-  if (score <= 80) return 'severe'
+export function getScoreLevel(score: number | null | undefined): ScoreLevel {
+  const s = score ?? 0
+  if (s <= 20) return 'safe'
+  if (s <= 40) return 'mild'
+  if (s <= 60) return 'moderate'
+  if (s <= 80) return 'severe'
   return 'critical'
 }
 
-export function getScoreLabel(score: number, lang: 'es' | 'en' = 'es'): string {
+export function getScoreLabel(score: number | null | undefined, lang: 'es' | 'en' = 'es'): string {
   const level = getScoreLevel(score)
   const labels = {
     es: {
@@ -199,10 +200,11 @@ export function getScoreLabel(score: number, lang: 'es' | 'en' = 'es'): string {
   return labels[lang][level]
 }
 
-export function getScoreColor(score: number): string {
-  if (score <= 20) return 'var(--score-safe)'
-  if (score <= 40) return 'var(--score-mild)'
-  if (score <= 60) return 'var(--score-moderate)'
-  if (score <= 80) return 'var(--score-severe)'
+export function getScoreColor(score: number | null | undefined): string {
+  const s = score ?? 0
+  if (s <= 20) return 'var(--score-safe)'
+  if (s <= 40) return 'var(--score-mild)'
+  if (s <= 60) return 'var(--score-moderate)'
+  if (s <= 80) return 'var(--score-severe)'
   return 'var(--score-critical)'
 }

@@ -113,7 +113,7 @@ async function seed() {
       if (articleError) throw articleError
 
       // Insert Article Techniques
-      if (article.techniquesDetected?.length > 0) {
+      if ((article.techniquesDetected?.length ?? 0) > 0) {
         // Delete old to avoid duplicates on re-seed
         await supabase.from('article_techniques').delete().eq('article_id', article.id)
         
@@ -130,12 +130,12 @@ async function seed() {
       }
 
       // Insert Article Analysis Logs
-      if (article.analysisLogs?.length > 0) {
+      if ((article.analysisLogs?.length ?? 0) > 0) {
         // Delete old to avoid duplicates
         await supabase.from('article_analysis_logs').delete().eq('article_id', article.id)
 
         const { error: logError } = await supabase.from('article_analysis_logs').insert(
-          article.analysisLogs.map(log => ({
+          (article.analysisLogs || []).map(log => ({
             article_id: article.id,
             step_id: log.stepId,
             status: log.status,

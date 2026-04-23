@@ -13,8 +13,8 @@ export const api = {
       `)
       .order('published_at', { ascending: false })
 
-    if (countryCode) {
-      query = query.eq('country_code', countryCode)
+    if (countryCode && countryCode !== 'ALL') {
+      query = query.or(`country_code.eq.${countryCode},country_code.eq.ALL`)
     }
 
     const { data: articles, error } = await query

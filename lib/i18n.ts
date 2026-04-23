@@ -63,11 +63,6 @@ export const TRANSLATIONS = {
     detectedTechniques: 'Técnicas Detectadas',
     summary: 'Resumen Neutralizado',
     
-    // Grafo
-    ecosystem: 'Ecosistema',
-    influenceMap: 'Mapeo topológico de influencia. El motor de físicas calcula la gravedad de citación en tiempo real.',
-    networkStatus: 'Estado de la Red',
-    
     // Filters
     allCountries: 'Todos los Países',
     sortBy: 'Ordenar por',
@@ -111,14 +106,8 @@ export const TRANSLATIONS = {
     ecosystem: 'Ecosistema',
     graphDesc: 'Mapeo topológico de influencia. El motor de físicas calcula la gravedad de citación en tiempo real.',
     networkStatus: 'Estado de la Red',
-    activeEntities: 'Entidades Activas',
-    vectors: 'Vectores (Aristas)',
-    identifiedClusters: 'Clusters Identificados',
-    globalAgencies: 'Agencias Globales',
     globalAgenciesDesc: 'Alta centralidad y verificación estricta. Actúan como fuentes primarias del ecosistema (Reuters, AP).',
-    echoChambers: 'Cámaras de Eco',
     echoChambersDesc: 'Densamente interconectadas a nivel regional. Amplifican narrativas locales generando alta resonancia.',
-    manipulationNodes: 'Nodos de Manipulación',
     manipulationNodesDesc: 'Alta retroalimentación interna. Suelen aislarse de fuentes primarias para sostener agendas (RT, Telesur).',
     gravityIn: 'Gravedad (In)',
     citationsOut: 'Citaciones (Out)',
@@ -217,11 +206,6 @@ export const TRANSLATIONS = {
     detectedTechniques: 'Detected Techniques',
     summary: 'Neutralized Summary',
 
-    // Grafo
-    ecosystem: 'Ecosystem',
-    influenceMap: 'Topological influence mapping. The physics engine calculates citation gravity in real-time.',
-    networkStatus: 'Network Status',
-
     // Filters
     allCountries: 'All Countries',
     sortBy: 'Sort by',
@@ -265,14 +249,8 @@ export const TRANSLATIONS = {
     ecosystem: 'Ecosystem',
     graphDesc: 'Topological mapping of influence. The physics engine calculates citation gravity in real-time.',
     networkStatus: 'Network Status',
-    activeEntities: 'Active Entities',
-    vectors: 'Vectors (Edges)',
-    identifiedClusters: 'Identified Clusters',
-    globalAgencies: 'Global Agencies',
     globalAgenciesDesc: 'High centrality and strict verification. They act as primary sources of the ecosystem (Reuters, AP).',
-    echoChambers: 'Echo Chambers',
     echoChambersDesc: 'Densely interconnected at the regional level. They amplify local narratives generating high resonance.',
-    manipulationNodes: 'Manipulation Nodes',
     manipulationNodesDesc: 'High internal feedback. They usually isolate themselves from primary sources to sustain agendas (RT, Telesur).',
     gravityIn: 'Gravity (In)',
     citationsOut: 'Citations (Out)',

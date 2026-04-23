@@ -7,10 +7,10 @@ import type { GeolocationResult } from '@/lib/types'
 async function detectGeoFromIP(): Promise<GeolocationResult | null> {
   try {
     // ip-api.com: 1000 req/min free, no key required
-    const res = await fetch('http://ip-api.com/json/?fields=country,countryCode,city,timezone', {
+    const res = await fetch('/api/location', {
       cache: 'no-store',
     })
-    if (!res.ok) throw new Error('ip-api failed')
+    if (!res.ok) throw new Error('freeipapi failed')
     const data = await res.json()
     
     const countryCode: string = data.countryCode ?? 'CO'

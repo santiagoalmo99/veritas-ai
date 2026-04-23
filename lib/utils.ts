@@ -8,9 +8,36 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function formatRelativeTime(date: string | Date, lang: 'es' | 'en' = 'es'): string {
-  const d = typeof date === 'string' ? new Date(date) : date
+  const d = typeof date === 'string' ? parseGdeltDate(date) : date
   const locale = lang === 'es' ? es : enUS
+  
+  if (isNaN(d.getTime())) {
+    return lang === 'es' ? 'recientemente' : 'recently'
+  }
+  
   return formatDistanceToNow(d, { addSuffix: true, locale })
+}
+
+/**
+ * Parses GDELT date format YYYYMMDDHHMMSS or YYYYMMDDHHMMSSZ
+ */
+export function parseGdeltDate(dateStr: string): Date {
+  if (!dateStr || dateStr.length < 8) return new Date(dateStr)
+  
+  // If it's already a standard format, return it
+  if (dateStr.includes('-') || dateStr.includes(':')) {
+    return new Date(dateStr)
+  }
+
+  // GDELT format: 20240423143000
+  const year = parseInt(dateStr.substring(0, 4))
+  const month = parseInt(dateStr.substring(4, 6)) - 1 // 0-indexed
+  const day = parseInt(dateStr.substring(6, 8))
+  const hour = parseInt(dateStr.substring(8, 10)) || 0
+  const minute = parseInt(dateStr.substring(10, 12)) || 0
+  const second = parseInt(dateStr.substring(12, 14)) || 0
+
+  return new Date(Date.UTC(year, month, day, hour, minute, second))
 }
 
 export function formatDate(date: string | Date, lang: 'es' | 'en' = 'es'): string {

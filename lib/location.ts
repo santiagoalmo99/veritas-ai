@@ -1,6 +1,6 @@
 export async function getUserLocation() {
   try {
-    const res = await fetch('http://ip-api.com/json/', {
+    const res = await fetch('/api/location', {
       next: { revalidate: 3600 } // Cache location for 1 hour
     })
     

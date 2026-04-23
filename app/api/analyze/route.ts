@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+export const dynamic = 'force-dynamic'
 import * as cheerio from 'cheerio'
 import { generateObject } from 'ai'
 import { createOpenAI } from '@ai-sdk/openai'

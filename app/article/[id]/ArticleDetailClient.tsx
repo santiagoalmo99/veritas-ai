@@ -102,7 +102,7 @@ export function ArticleDetailClient({ article: initialArticle }: { article: Arti
                   <span className="flex items-center gap-1.5 text-[var(--text-secondary)]">
                     <Globe size={12} className="text-[var(--color-accent)]" />
                     <span className="text-[var(--text-secondary)]">{article.outlet?.name}</span>
-                    <VeritasBubble score={article.outlet?.currentVeritasAvg} />
+                    <VeritasBubble score={article.outlet?.currentVeritasAvg ?? 0} />
                   </span>
                   {article.journalist && (
                     <>
@@ -110,7 +110,7 @@ export function ArticleDetailClient({ article: initialArticle }: { article: Arti
                       <span className="flex items-center gap-1.5">
                         <User size={12} />
                         <span className="text-[var(--text-tertiary)]">{article.journalist}</span>
-                        <VeritasBubble score={article.journalistScore} />
+                        <VeritasBubble score={article.journalistScore ?? 0} />
                       </span>
                     </>
                   )}
@@ -439,7 +439,7 @@ export function ArticleDetailClient({ article: initialArticle }: { article: Arti
                     <h4 className="text-sm font-display font-bold text-[var(--color-text-primary)] leading-tight">{article.journalist}</h4>
                     <p className="text-[9px] text-[var(--text-secondary)] uppercase tracking-[0.1em] font-mono mt-0.5">Primary Contributor</p>
                   </div>
-                  <VeritasBubble score={article.journalistScore} className="w-7 h-7 text-[10px]" />
+                  <VeritasBubble score={article.journalistScore ?? 0} className="w-7 h-7 text-[10px]" />
                 </div>
 
                 <div className="grid grid-cols-2 gap-px bg-white/5 border border-white/5 rounded-xl overflow-hidden">

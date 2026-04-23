@@ -18,13 +18,14 @@ export async function GET(request: Request) {
     })
 
     if (!response.ok) {
-      throw new Error(`Yahoo Finance responded with ${response.status}`)
+      return NextResponse.json({ quoteResponse: { result: [] } })
     }
 
     const data = await response.json()
     return NextResponse.json(data)
   } catch (error: any) {
     console.error('Market Proxy Error:', error)
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    // Return empty results instead of 500 to keep console clean
+    return NextResponse.json({ quoteResponse: { result: [] } })
   }
 }

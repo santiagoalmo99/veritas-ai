@@ -71,7 +71,7 @@ export function useAnalysis(article: Partial<Article> | null) {
           url: art.url,
           title: art.title,
           excerpt: art.excerpt,
-          content: art.neutralizedText, // if we already fetched full content
+          content: art.summaryNeutralized, // if we already fetched full content
           outletName: art.outlet?.name,
           outletDomain: art.outlet?.domain,
         }),
@@ -96,7 +96,7 @@ export function useAnalysis(article: Partial<Article> | null) {
           analysisConfidence: data.analysisConfidence,
           techniquesDetected: data.techniquesDetected ?? [],
           titleNeutralized: data.titleNeutralized,
-          neutralizedText: data.summaryNeutralized,
+          summaryNeutralized: data.summaryNeutralized,
           category: data.category ?? art.category,
           // Keep score breakdown for advanced view
           _scoreBreakdown: data.scoreBreakdown,

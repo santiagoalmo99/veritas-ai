@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+export const dynamic = 'force-dynamic'
 import { createClient } from '@supabase/supabase-js'
 import { TECHNIQUES, MEDIA_OUTLETS, MOCK_ARTICLES } from '@/lib/mock-data'
 
@@ -109,7 +110,7 @@ export async function GET() {
       })
       if (articleError) throw articleError
 
-      if (article.techniquesDetected?.length > 0) {
+      if ((article.techniquesDetected?.length ?? 0) > 0) {
         await supabase.from('article_techniques').delete().eq('article_id', article.id)
         const { error: techLinkError } = await supabase.from('article_techniques').insert(
           article.techniquesDetected.map(td => ({
@@ -123,10 +124,10 @@ export async function GET() {
         if (techLinkError) throw techLinkError
       }
 
-      if (article.analysisLogs?.length > 0) {
+      if ((article.analysisLogs?.length ?? 0) > 0) {
         await supabase.from('article_analysis_logs').delete().eq('article_id', article.id)
         const { error: logError } = await supabase.from('article_analysis_logs').insert(
-          article.analysisLogs.map(log => ({
+          (article.analysisLogs || []).map(log => ({
             article_id: article.id,
             step_id: log.stepId,
             status: log.status,

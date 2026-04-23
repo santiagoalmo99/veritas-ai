@@ -68,8 +68,8 @@ export function AnalysisPanel({
 
   const isAnalyzed = article.analysisStatus === 'completed'
   const score = article.veritasScore
-  const level = score !== undefined ? getScoreLevel(score) : null
-  const scoreColor = score !== undefined ? getScoreColor(score) : 'var(--text-tertiary)'
+  const level = (score !== undefined && score !== null) ? getScoreLevel(score) : null
+  const scoreColor = (score !== undefined && score !== null) ? getScoreColor(score) : 'var(--text-tertiary)'
   const breakdown = article._scoreBreakdown ?? {}
   const coordinationRisk = COORDINATION_RISK_LABELS[article._coordinationRisk ?? 'none']
   const intent = INTENT_LABELS[article._primaryIntent ?? 'inform']
@@ -153,7 +153,7 @@ export function AnalysisPanel({
             {/* Score hero */}
             <div className="glass-card p-5">
               <div className="flex items-center gap-5">
-                <VeritasScore score={score} size="lg" showLabel animated />
+                <VeritasScore score={score ?? 0} size="lg" showLabel animated />
 
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
@@ -161,7 +161,7 @@ export function AnalysisPanel({
                       className="text-lg font-display font-bold"
                       style={{ color: scoreColor }}
                     >
-                      {getScoreLabel(score, 'es')}
+                      {getScoreLabel(score ?? 0, 'es')}
                     </span>
                     {level === 'safe' && <CheckCircle size={16} className="text-[var(--score-safe)]" />}
                     {(level === 'severe' || level === 'critical') && <AlertTriangle size={16} className="text-[var(--score-severe)]" />}
@@ -293,13 +293,13 @@ export function AnalysisPanel({
                           {article.titleNeutralized}
                         </p>
                       </div>
-                      {article.neutralizedText && (
+                      {article.summaryNeutralized && (
                         <div>
                           <p className="text-[0.7rem] text-[var(--text-disabled)] uppercase tracking-wider mb-1">
                             Resumen factual
                           </p>
                           <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
-                            {article.neutralizedText}
+                            {article.summaryNeutralized}
                           </p>
                         </div>
                       )}

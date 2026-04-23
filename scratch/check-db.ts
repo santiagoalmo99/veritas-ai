@@ -1,4 +1,4 @@
-import { supabaseAdmin } from './lib/supabase-service'
+import { supabaseAdmin } from '../lib/supabase-admin'
 
 async function checkOutlets() {
   const { data, error } = await supabaseAdmin.from('media_outlets').select('id, name').limit(10)

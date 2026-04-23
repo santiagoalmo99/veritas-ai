@@ -68,72 +68,75 @@ export function GrafoClient({ initialOutlets }: GrafoClientProps) {
 
   useEffect(() => {
     async function loadRealData() {
-      setLoading(true)
-      const { data: outlets, error } = await supabase
-        .from('media_outlets')
-        .select('*')
-      
-      if (error || !outlets) {
-        console.error("Error loading outlets:", error)
-        return
-      }
-
-      // Generate Rich Topology based on REAL nodes
-      const newNodes: Node[] = outlets.map(o => ({
-        id: o.domain,
-        name: o.name,
-        alertLevel: o.alert_level,
-        score: o.current_veritas_avg,
-        val: 2, 
-        x: cx + (Math.random() - 0.5) * 800,
-        y: cy + (Math.random() - 0.5) * 800,
-        vx: 0, vy: 0,
-        inDegree: 0, outDegree: 0,
-        color: getScoreColor(o.current_veritas_avg)
-      }))
-
-      const newLinks: Link[] = []
-      
-      const addLink = (source: string, target: string, weight = 1) => {
-        newLinks.push({ id: `${source}-${target}`, source, target, weight })
-        const s = newNodes.find(n => n.id === source)
-        const t = newNodes.find(n => n.id === target)
-        if (s) s.outDegree += 1
-        if (t) {
-          t.inDegree += 1
-          t.val += 0.5 * weight
+      try {
+        setLoading(true)
+        const { data: outlets, error } = await supabase
+          .from('media_outlets')
+          .select('*')
+        
+        if (error || !outlets) {
+          console.error("Error loading outlets:", error)
+          return
         }
-      }
 
-      // Logic to generate links between real nodes
-      const agencies = outlets.filter(o => ['reuters.com', 'apnews.com', 'bloomberg.com'].includes(o.domain)).map(o => o.domain)
-      
-      outlets.forEach(o => {
-        if (!agencies.includes(o.domain) && Math.random() > 0.4) {
-          const agency = agencies[Math.floor(Math.random() * agencies.length)]
-          addLink(o.domain, agency, Math.random() * 2 + 1)
+        // Generate Rich Topology based on REAL nodes
+        const newNodes: Node[] = outlets.map(o => ({
+          id: o.domain,
+          name: o.name,
+          alertLevel: o.alert_level,
+          score: o.current_veritas_avg,
+          val: 2, 
+          x: cx + (Math.random() - 0.5) * 800,
+          y: cy + (Math.random() - 0.5) * 800,
+          vx: 0, vy: 0,
+          inDegree: 0, outDegree: 0,
+          color: getScoreColor(o.current_veritas_avg)
+        }))
+
+        const newLinks: Link[] = []
+        
+        const addLink = (source: string, target: string, weight = 1) => {
+          newLinks.push({ id: `${source}-${target}`, source, target, weight })
+          const s = newNodes.find(n => n.id === source)
+          const t = newNodes.find(n => n.id === target)
+          if (s) s.outDegree += 1
+          if (t) {
+            t.inDegree += 1
+            t.val += 0.5 * weight
+          }
         }
-      })
 
-      // Cross-linking logic based on country or bias
-      outlets.forEach((o1, i) => {
-        outlets.slice(i + 1).forEach(o2 => {
-          if (o1.country_code === o2.country_code && Math.random() > 0.6) {
-            addLink(o1.domain, o2.domain, 2)
+        // Logic to generate links between real nodes
+        const agencies = outlets.filter(o => ['reuters.com', 'apnews.com', 'bloomberg.com'].includes(o.domain)).map(o => o.domain)
+        
+        outlets.forEach(o => {
+          if (!agencies.includes(o.domain) && Math.random() > 0.4 && agencies.length > 0) {
+            const agency = agencies[Math.floor(Math.random() * agencies.length)]
+            addLink(o.domain, agency, Math.random() * 2 + 1)
           }
         })
-      })
 
-      setNodes(newNodes)
-      setLinks(newLinks)
-      setLoading(false)
+        // Cross-linking logic based on country or bias
+        outlets.forEach((o1, i) => {
+          outlets.slice(i + 1).forEach(o2 => {
+            if (o1.country_code === o2.country_code && Math.random() > 0.6) {
+              addLink(o1.domain, o2.domain, 2)
+            }
+          })
+        })
+
+        setNodes(newNodes)
+        setLinks(newLinks)
+      } finally {
+        setLoading(false)
+      }
     }
 
     loadRealData()
   }, [cx, cy])
 
   // Physics Simulation Loop
-  const requestRef = useRef<number>()
+  const requestRef = useRef<number | null>(null)
   
   const updatePhysics = () => {
     setNodes(prev => {
@@ -313,12 +316,12 @@ export function GrafoClient({ initialOutlets }: GrafoClientProps) {
                 </div>
 
                 <div className="space-y-4">
-                  <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 mb-2">{t.identifiedClusters}</h3>
+                  <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 mb-2">{t.clusters}</h3>
                   
                   <div className="p-5 rounded-xl border border-white/5 bg-black/20 hover:bg-white/5 transition-all duration-300 cursor-default group">
                     <div className="flex items-center gap-3 mb-2">
                       <ShieldCheck size={16} className="text-[var(--score-safe)] drop-shadow-[0_0_8px_var(--score-safe)]" />
-                      <h4 className="text-sm font-bold text-white tracking-tight">{t.globalAgencies}</h4>
+                      <h4 className="text-sm font-bold text-white tracking-tight">{t.agencies}</h4>
                     </div>
                     <p className="text-[11px] text-white/40 leading-relaxed group-hover:text-white/60 transition-colors">{t.globalAgenciesDesc}</p>
                   </div>
@@ -538,7 +541,7 @@ export function GrafoClient({ initialOutlets }: GrafoClientProps) {
                 if (selectedNode) {
                   isConnected = links.some(l => (l.source === node.id && l.target === selectedNode.id) || (l.target === node.id && l.source === selectedNode.id))
                 } else if (hoveredNode) {
-                  isConnected = links.some(l => (l.source === node.id && l.target === hoveredNode.id) || (l.target === node.id && l.source === hoveredNode.id))
+                  isConnected = links.some(l => (l.source === node.id && l.target === hoveredNode) || (l.target === node.id && l.source === hoveredNode))
                 }
 
                 const isFocused = isSelected || isHovered || isConnected

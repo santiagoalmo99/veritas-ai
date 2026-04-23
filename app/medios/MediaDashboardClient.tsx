@@ -5,7 +5,7 @@ import {
   ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, ReferenceLine, Cell
 } from 'recharts'
-import { Shield, TrendingUp, TrendingDown, Minus, Globe, BarChart2, AlertCircle, ChevronRight, Loader2, Zap, Activity } from 'lucide-react'
+import { Shield, TrendingUp, TrendingDown, Minus, Globe, BarChart2, AlertCircle, Loader2, Zap, Activity } from 'lucide-react'
 import type { MediaOutlet } from '@/lib/types'
 import { getScoreColor, getScoreLevel } from '@/lib/types'
 import { useI18n } from '@/lib/i18n'
@@ -15,7 +15,7 @@ import { cn } from '@/lib/utils'
 
 // Score → alert level background for chart dots
 function getOutletDotColor(outlet: MediaOutlet): string {
-  const avg = outlet.currentVeritasAvg
+  const avg = outlet.currentVeritasAvg ?? 0
   if (avg <= 20) return 'var(--score-safe)'
   if (avg <= 40) return 'var(--score-mild)'
   if (avg <= 60) return 'var(--score-moderate)'
@@ -265,8 +265,70 @@ export function MediaDashboardClient({
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -10 }}
-                className="space-y-2"
+                className="space-y-6"
               >
+                {/* Media Bias Chart (REAL DATA FROM SUPABASE) */}
+                <div className="glass-card p-6 h-[450px] relative overflow-hidden group">
+            <div className="absolute inset-0 bg-gradient-to-br from-[var(--color-accent)]/5 to-transparent pointer-events-none" />
+            <div className="flex items-center justify-between mb-8 relative z-10">
+              <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--color-text-primary)] flex items-center gap-2">
+                <Shield size={12} className="text-[var(--color-accent)]" /> 
+                {t.mediaAudit} — Topology
+              </h3>
+              <div className="flex gap-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-[var(--score-safe)]" />
+                  <span className="text-[8px] font-bold uppercase tracking-widest text-[var(--color-text-tertiary)]">Reliable</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-[var(--score-critical)]" />
+                  <span className="text-[8px] font-bold uppercase tracking-widest text-[var(--color-text-tertiary)]">High Risk</span>
+                </div>
+              </div>
+            </div>
+
+            <ResponsiveContainer width="100%" height="80%">
+              <ScatterChart margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
+                <CartesianGrid strokeDasharray="1 4" stroke="var(--color-border)" vertical={false} />
+                <XAxis 
+                  type="number" 
+                  dataKey="x" 
+                  domain={[0, 100]} 
+                  hide 
+                />
+                <YAxis 
+                  type="number" 
+                  dataKey="y" 
+                  domain={[0, 100]} 
+                  hide 
+                />
+                <Tooltip content={<MediaTooltip />} cursor={{ strokeDasharray: '3 3', stroke: 'var(--color-accent)' }} />
+                
+                {/* Quadrant Markers */}
+                <ReferenceLine x={50} stroke="var(--color-border)" strokeWidth={1} />
+                <ReferenceLine y={50} stroke="var(--color-border)" strokeWidth={1} />
+                
+                <Scatter name="Outlets" data={scatterData}>
+                  {scatterData.map((entry, index) => (
+                    <Cell 
+                      key={`cell-${index}`} 
+                      fill={getOutletDotColor(entry)} 
+                      className="cursor-pointer transition-all duration-500 hover:scale-125"
+                      onClick={() => setSelectedOutlet(entry)}
+                    />
+                  ))}
+                </Scatter>
+              </ScatterChart>
+            </ResponsiveContainer>
+
+            <div className="absolute bottom-6 left-6 right-6 flex justify-between items-center text-[9px] font-black uppercase tracking-[0.2em] text-[var(--color-text-tertiary)] border-t border-[var(--color-border-soft)] pt-4">
+              <span className="flex items-center gap-2"><TrendingDown size={10} /> {t.progressive}</span>
+              <span className="opacity-40">{t.center}</span>
+              <span className="flex items-center gap-2">{t.conservative} <TrendingUp size={10} /></span>
+            </div>
+                </div>
+
+                <div className="space-y-2">
                 {filteredOutlets.map((outlet, i) => {
                   const isSelected = selectedOutlet?.id === outlet.id
                   return (

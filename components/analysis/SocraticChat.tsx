@@ -20,8 +20,8 @@ export function SocraticChat({ article }: SocraticChatProps) {
 
   const articleContext = {
     title: article.title ?? '',
-    veritasScore: article.veritasScore,
-    titleNeutralized: article.titleNeutralized,
+    veritasScore: article.veritasScore ?? undefined,
+    titleNeutralized: article.titleNeutralized ?? undefined,
     techniquesDetected: article.techniquesDetected?.map((dt) => ({
       technique: { name: dt.technique.nameEs },
       quote: dt.quote,

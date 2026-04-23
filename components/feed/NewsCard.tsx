@@ -23,7 +23,7 @@ function ArticleMeta({ publishedAt, language }: { publishedAt: string, language:
     <div className="flex items-center gap-1.5 mb-2 text-[var(--color-text-secondary)]">
       <Clock size={12} />
       <time className="font-ui text-[0.7rem] uppercase tracking-wide font-semibold" dateTime={publishedAt}>
-        {isEn ? 'Published' : 'Publicado'} {formatRelativeTime(publishedAt, language)}
+        {isEn ? 'Published' : 'Publicado'} {formatRelativeTime(publishedAt, language as 'en' | 'es')}
       </time>
     </div>
   )
@@ -136,7 +136,12 @@ export function NewsCard({ article, index = 0 }: NewsCardProps) {
         isHorizontal ? "md:w-[45%] lg:w-[40%] min-h-[300px] md:min-h-full border-b md:border-b-0" : "aspect-[16/10] border-b",
         isHorizontal && imagePos === 'right' ? "md:order-2 md:border-l" : "md:order-1 md:border-r"
       )}>
-        <ClientImage articleUrl={article.url} alt={article.title} priority={index === 0} />
+        <ClientImage 
+          imageUrl={article.imageUrl} 
+          articleUrl={article.url} 
+          alt={article.title} 
+          priority={index === 0} 
+        />
         
         <div className="absolute top-3 right-3 z-20">
           <div className={cn(
@@ -174,14 +179,14 @@ export function NewsCard({ article, index = 0 }: NewsCardProps) {
               <span className="font-ui text-[9px] font-bold text-[var(--color-text-secondary)] uppercase tracking-widest whitespace-nowrap">
                 {article.outlet.name}
               </span>
-              <VeritasScore score={article.outlet.currentVeritasAvg} size="xs" animated />
+              <VeritasScore score={article.outlet.currentVeritasAvg ?? 0} size="xs" animated />
             </div>
             {article.journalist && (
               <div className="flex items-center gap-2 opacity-80">
                 <span className="font-ui text-[8px] font-medium text-[var(--color-text-tertiary)] uppercase tracking-wider">
                   {article.journalist}
                 </span>
-                <VeritasScore score={article.journalistScore} size="xs" animated />
+                <VeritasScore score={article.journalistScore ?? 0} size="xs" animated />
               </div>
             )}
           </div>

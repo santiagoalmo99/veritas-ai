@@ -588,7 +588,7 @@ export const MOCK_ARTICLES: Article[] = [
     analysisConfidence: 0.98,
     viewCount: 15400,
     trendingScore: 0.76,
-    tags: ['AI', 'Regulation', 'EU', 'Technology', 'international'],
+    tags: ['tech', 'international'],
     techniquesDetected: [
       {
         technique: TECHNIQUES[1]!,
@@ -915,9 +915,6 @@ export function simulateInfiniteScroll(
       slice.push({
         ...article,
         id: `${article.id}-p${page}-${i}-${Math.random().toString(36).slice(2, 5)}`,
-        publishedAt: new Date(
-          Date.now() - 1000 * 60 * (i * 15 + page * 60)
-        ).toISOString(),
         viewCount: article.viewCount + Math.floor(Math.random() * 1000),
       })
     }

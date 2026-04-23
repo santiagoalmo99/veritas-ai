@@ -27,6 +27,16 @@ export function InfiniteFeed({ initialCountry = 'CO', initialTopics = [] }: Infi
     perPage: 9,
   })
 
+  console.log('[InfiniteFeed Debug]:', { 
+    articlesCount: articles.length, 
+    loading, 
+    initialLoading, 
+    source, 
+    error,
+    countryCode,
+    topics
+  })
+
   const sentinelRef = useRef<HTMLDivElement>(null)
 
   const onIntersect = useCallback(
