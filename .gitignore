@@ -1,0 +1,33 @@
+# ── Next.js ────────────────────────────────────────
+.next/
+out/
+build/
+
+# ── Dependencias ────────────────────────────────────
+node_modules/
+.npm
+
+# ── Variables de entorno — NUNCA commitear ──────────
+# .env.local contiene TODAS las API keys y credenciales
+.env
+.env.local
+.env.production
+.env*.local
+
+# ── TypeScript ──────────────────────────────────────
+*.tsbuildinfo
+next-env.d.ts
+
+# ── OS ──────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ── Editores ────────────────────────────────────────
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# ── Logs ────────────────────────────────────────────
+*.log
+npm-debug.log*
