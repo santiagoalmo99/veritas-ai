@@ -64,14 +64,15 @@ export async function fetchMarketData(countryCode: string = 'CO'): Promise<Marke
     
   } catch (error) {
     // Silenciar error en consola y retornar mock data realista
+    // Silenciar error en consola y retornar mock data estable (para evitar que brinque aleatoriamente)
     return indices.map(index => {
       const isBTC = index.symbol === 'BTC-USD'
       const isCOP = index.symbol === 'COP=X'
-      let basePrice = 5000 + Math.random() * 200
-      if (isBTC) basePrice = 64000 + Math.random() * 2000
-      if (isCOP) basePrice = 3900 + Math.random() * 100
+      let basePrice = 5245.32 // S&P 500 approx
+      if (isBTC) basePrice = 77890.00
+      if (isCOP) basePrice = 3950.00
       
-      const change = (Math.random() - 0.5) * 2
+      const change = isBTC ? -0.72 : isCOP ? 0.15 : 1.2
       
       const formatPrice = (price: number, sym: string) => {
         if (sym === 'BTC-USD') return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(price)

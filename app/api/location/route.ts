@@ -1,10 +1,14 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic'
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
-    const res = await fetch('https://freeipapi.com/api/json/', {
+    const forwardedFor = req.headers.get('x-forwarded-for')
+    // Extract first IP if there are multiple, or fallback to empty for automatic detection (local dev)
+    const ip = forwardedFor ? forwardedFor.split(',')[0].trim() : ''
+
+    const res = await fetch(`https://freeipapi.com/api/json/${ip}`, {
       next: { revalidate: 3600 }
     })
     

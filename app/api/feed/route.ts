@@ -181,7 +181,13 @@ export async function GET(request: Request) {
 
       // 4. Map GDELT articles to our schema (WITHOUT outlet_id to avoid FK violations)
       const articles = rawArticles.map((art: any) => {
-        const articleId = Buffer.from(art.url).toString('base64url').slice(0, 64)
+        // Simple edge-compatible hash for ID
+        let hash = 0;
+        for (let i = 0; i < art.url.length; i++) {
+          hash = ((hash << 5) - hash) + art.url.charCodeAt(i);
+          hash = hash & hash;
+        }
+        const articleId = `gdelt-${Math.abs(hash)}-${Date.now()}`;
         const rawDate = art.seendate || ''
         let publishedAt = new Date().toISOString()
 

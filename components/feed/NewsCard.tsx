@@ -176,11 +176,11 @@ export function NewsCard({ article, index = 0 }: NewsCardProps) {
         <div className="flex items-center justify-between mt-auto pt-4 border-t border-[var(--color-border)] relative z-10">
           <div className="flex flex-col gap-1.5">
             <div className="flex items-center gap-2">
-              <img src={`https://www.google.com/s2/favicons?domain=${article.outlet.domain}&sz=32`} alt="" className="w-4 h-4 rounded-full ring-1 ring-[var(--color-border)]" />
+              <img src={`https://www.google.com/s2/favicons?domain=${article.outlet?.domain || new URL(article.url).hostname}&sz=32`} alt="" className="w-4 h-4 rounded-full ring-1 ring-[var(--color-border)]" />
               <span className="font-ui text-[9px] font-bold text-[var(--color-text-secondary)] uppercase tracking-widest whitespace-nowrap">
-                {article.outlet.name}
+                {article.outlet?.name || new URL(article.url).hostname.replace('www.', '')}
               </span>
-              <VeritasScore score={article.outlet.currentVeritasAvg ?? 0} size="xs" animated />
+              <VeritasScore score={article.outlet?.currentVeritasAvg ?? (article.veritasScore ?? 50)} size="xs" animated />
             </div>
             {article.journalist && (
               <div className="flex items-center gap-2 opacity-80">

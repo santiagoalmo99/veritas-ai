@@ -40,9 +40,10 @@ export default function HomePage() {
           <div className="border border-[var(--color-border)] rounded-sm p-5 bg-[var(--color-surface-1)]">
             <div className="flex items-center justify-between mb-2">
               <span className="font-ui font-semibold text-xs tracking-wider uppercase text-[var(--color-text-secondary)]">Tendencias</span>
+              <span className="font-ui text-[9px] uppercase tracking-widest text-[var(--color-accent)] border border-[var(--color-accent)]/30 bg-[var(--color-accent)]/10 px-1.5 py-0.5 rounded">Beta</span>
             </div>
             <p className="font-ui text-sm text-[var(--color-text-tertiary)]">
-              Procesando entidades principales...
+              El análisis predictivo de entidades y narrativas globales estará disponible próximamente.
             </p>
           </div>
         </aside>
