@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { MEDIA_OUTLETS } from '@/lib/mock-data'
 import { parseGdeltDate } from '@/lib/utils'
 
 export const dynamic = 'force-dynamic'
 
-const GDELT_API_URL = 'https://api.gdeltproject.org/api/v2/context/context'
+const GDELT_API_URL = 'https://api.gdeltproject.org/api/v2/doc/doc'
 
-// Solo permitir llamadas con un token secreto para seguridad en Vercel
+// Only allow calls with a secret token for security in Vercel
 const CRON_SECRET = process.env.CRON_SECRET || 'veritas_debug_key'
 
 export async function GET(req: NextRequest) {
@@ -28,8 +27,17 @@ export async function GET(req: NextRequest) {
 
   try {
     console.log('[Cron Ingest]: Starting news ingestion from GDELT...')
+
+    // 1. Load known outlets from Supabase (real data, not mock)
+    const { data: dbOutlets } = await supabase
+      .from('media_outlets')
+      .select('id, domain, country_code, current_veritas_avg')
+
+    const outletMap = new Map(
+      (dbOutlets || []).map(o => [o.domain, o])
+    )
     
-    // 1. Fetch from GDELT (last 24h, high volume)
+    // 2. Fetch from GDELT (last 24h, high volume)
     const gdeltParams = new URLSearchParams({
       format: 'json',
       timespan: '24h',
@@ -38,54 +46,75 @@ export async function GET(req: NextRequest) {
       mode: 'artlist'
     })
 
-    const response = await fetch(`${GDELT_API_URL}?${gdeltParams.toString()}`)
+    const response = await fetch(`${GDELT_API_URL}?${gdeltParams.toString()}`, {
+      signal: AbortSignal.timeout(30000),
+    })
+
+    if (!response.ok) {
+      throw new Error(`GDELT responded with ${response.status}`)
+    }
+
     const data = await response.json()
 
     if (!data.articles || data.articles.length === 0) {
       return NextResponse.json({ message: 'No new articles found in GDELT' })
     }
 
-    // 2. Filter and Map to DB Schema
+    // 3. Filter and Map to DB Schema
     const articlesToInsert = data.articles.map((art: any) => {
-      const domain = new URL(art.url).hostname.replace('www.', '')
-      const knownOutlet = MEDIA_OUTLETS.find(m => m.domain === domain)
+      let domain = ''
+      try {
+        domain = new URL(art.url).hostname.replace('www.', '')
+      } catch {
+        domain = 'unknown'
+      }
+
+      const knownOutlet = outletMap.get(domain)
       
       // Heuristic score for ingestion
       const urlHash = art.url.split('').reduce((acc: number, char: string) => acc + char.charCodeAt(0), 0)
-      const veritasScore = knownOutlet ? knownOutlet.currentVeritasAvg : (20 + (urlHash % 50))
+      const veritasScore = knownOutlet ? knownOutlet.current_veritas_avg : (20 + (urlHash % 50))
 
       return {
         id: `gdelt-${Buffer.from(art.url).toString('hex').slice(0, 16)}`,
         url: art.url,
         title: art.title,
-        excerpt: art.excerpt || 'Análisis automatizado en proceso...',
+        excerpt: art.excerpt || null,
         image_url: art.socialimage || null,
-        outlet_id: knownOutlet?.id || 'unknown',
-        journalist: art.source || 'Redacción',
+        outlet_id: knownOutlet?.id || null,
+        journalist: art.source || null,
         published_at: art.seendate ? parseGdeltDate(art.seendate).toISOString() : new Date().toISOString(),
-        category: 'noticia',
-        country_code: knownOutlet?.countryCode || 'ALL',
+        category: 'politics', // Default category, can be enhanced with NLP
+        country_code: knownOutlet?.country_code || 'ALL',
         language: 'es',
         veritas_score: veritasScore,
-        analysis_status: 'completed',
+        analysis_status: 'pending',
         trending_score: Math.floor(Math.random() * 100),
         tags: []
       }
     })
 
-    // 3. Upsert to Supabase
-    const { error, count } = await supabase
-      .from('articles')
-      .upsert(articlesToInsert, { 
-        onConflict: 'url',
-        ignoreDuplicates: false 
-      })
+    // 4. Filter out articles without valid outlet_id (FK constraint protection)
+    const validArticles = articlesToInsert.filter((a: any) => a.outlet_id !== null)
+    const skippedCount = articlesToInsert.length - validArticles.length
 
-    if (error) throw error
+    // 5. Upsert to Supabase
+    if (validArticles.length > 0) {
+      const { error } = await supabase
+        .from('articles')
+        .upsert(validArticles, { 
+          onConflict: 'id',
+          ignoreDuplicates: true 
+        })
+
+      if (error) throw error
+    }
 
     return NextResponse.json({ 
       success: true, 
-      ingested: articlesToInsert.length,
+      ingested: validArticles.length,
+      skipped: skippedCount,
+      reason_skipped: skippedCount > 0 ? 'No matching outlet in database' : undefined,
       timestamp: new Date().toISOString()
     })
 

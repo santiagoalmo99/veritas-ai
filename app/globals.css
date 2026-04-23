@@ -817,13 +817,13 @@
   max-width: 680px;
   max-height: 90dvh;
   overflow-y: auto;
-  background: var(--bg-surface);
-  border: 1px solid var(--border-default);
+  background: var(--color-surface-1);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-2xl);
   box-shadow:
     0 32px 80px oklch(0 0 0 / 0.6),
     inset 0 1px 0 var(--glass-border-top);
-  animation: slideInUp 0.4s var(--ease-spring) both;
+  animation: slideInUp 0.4s var(--ease-out) both;
 }
 
 @media (max-width: 640px) {

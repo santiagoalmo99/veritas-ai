@@ -90,21 +90,21 @@ export function InfiniteFeed({ initialCountry = 'CO', initialTopics = [] }: Infi
       <div className="flex items-center justify-between mb-6">
         {source && (
           <div className="flex items-center gap-3 px-3 py-1.5 rounded-full bg-[var(--color-surface-2)]/50 border border-[var(--color-border-soft)] shadow-inner">
-            {source.includes('gdelt') ? (
+            {source?.includes('gdelt') ? (
               <>
                 <div className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                 </div>
                 <span className="text-[10px] font-display font-black uppercase tracking-[0.2em] text-[var(--color-text-secondary)]">
-                  {t.realTime} <span className="text-[var(--color-accent)]">RED GLOBAL GDELT</span>
+                  {t.realTime} <span className="text-[var(--color-accent)]">GDELT {source === 'gdelt_live' ? 'LIVE' : 'NETWORK'}</span>
                 </span>
               </>
             ) : (
               <>
                 <div className="flex h-2 w-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
                 <span className="text-[10px] font-display font-black uppercase tracking-[0.2em] text-[var(--color-text-secondary)]">
-                  {t.archived} <span className="text-blue-400">INTELIGENCIA VERITAS</span>
+                  {t.archived} <span className="text-blue-400">VERITAS DATABASE</span>
                 </span>
               </>
             )}

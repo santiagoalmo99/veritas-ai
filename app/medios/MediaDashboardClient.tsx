@@ -108,7 +108,7 @@ export function MediaDashboardClient({
       sortBy === 'reliability' ? b.reliabilityScore - a.reliabilityScore :
       b.articlesAnalyzed - a.articlesAnalyzed
     )
-  }, [countryFilter, sortBy])
+  }, [countryFilter, sortBy, initialOutlets])
 
   const [analyzingUrl, setAnalyzingUrl] = useState('')
   const [isAnalyzing, setIsAnalyzing] = useState(false)

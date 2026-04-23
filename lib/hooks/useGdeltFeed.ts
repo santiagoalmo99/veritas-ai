@@ -8,7 +8,7 @@ interface FeedState {
   hasMore: boolean
   loading: boolean
   initialLoading: boolean
-  source: 'gdelt' | 'mock' | null
+  source: 'supabase' | 'gdelt_live' | 'gdelt_empty' | 'gdelt_unavailable' | null
   error: string | null
 }
 
@@ -63,7 +63,7 @@ export function useGdeltFeed({
             hasMore: data.hasMore ?? false,
             loading: false,
             initialLoading: false,
-            source: data.source ?? 'mock',
+            source: data.source ?? null,
             error: null,
           }
         }
@@ -75,7 +75,7 @@ export function useGdeltFeed({
           hasMore: data.hasMore ?? false,
           loading: false,
           initialLoading: false,
-          source: data.source ?? 'mock',
+          source: data.source ?? null,
           error: null,
         }
       })

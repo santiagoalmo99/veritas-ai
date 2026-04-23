@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
-import { TECHNIQUES, MEDIA_OUTLETS } from '../lib/mock-data'
+import { TECHNIQUES, MEDIA_OUTLETS } from '../lib/seed-data'
 
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL

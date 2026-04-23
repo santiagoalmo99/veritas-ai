@@ -8,7 +8,6 @@ import { VeritasBubble } from '@/components/score/VeritasScore'
 import type { MediaOutlet } from '@/lib/types'
 import { Loader2 } from 'lucide-react'
 import { useI18n } from '@/lib/i18n'
-import { supabase } from '@/lib/supabase'
 
 type Node = {
   id: string
@@ -67,73 +66,67 @@ export function GrafoClient({ initialOutlets }: GrafoClientProps) {
   const draggedNode = useRef<string | null>(null)
 
   useEffect(() => {
-    async function loadRealData() {
-      try {
-        setLoading(true)
-        const { data: outlets, error } = await supabase
-          .from('media_outlets')
-          .select('*')
-        
-        if (error || !outlets) {
-          console.error("Error loading outlets:", error)
-          return
-        }
-
-        // Generate Rich Topology based on REAL nodes
-        const newNodes: Node[] = outlets.map(o => ({
-          id: o.domain,
-          name: o.name,
-          alertLevel: o.alert_level,
-          score: o.current_veritas_avg,
-          val: 2, 
-          x: cx + (Math.random() - 0.5) * 800,
-          y: cy + (Math.random() - 0.5) * 800,
-          vx: 0, vy: 0,
-          inDegree: 0, outDegree: 0,
-          color: getScoreColor(o.current_veritas_avg)
-        }))
-
-        const newLinks: Link[] = []
-        
-        const addLink = (source: string, target: string, weight = 1) => {
-          newLinks.push({ id: `${source}-${target}`, source, target, weight })
-          const s = newNodes.find(n => n.id === source)
-          const t = newNodes.find(n => n.id === target)
-          if (s) s.outDegree += 1
-          if (t) {
-            t.inDegree += 1
-            t.val += 0.5 * weight
-          }
-        }
-
-        // Logic to generate links between real nodes
-        const agencies = outlets.filter(o => ['reuters.com', 'apnews.com', 'bloomberg.com'].includes(o.domain)).map(o => o.domain)
-        
-        outlets.forEach(o => {
-          if (!agencies.includes(o.domain) && Math.random() > 0.4 && agencies.length > 0) {
-            const agency = agencies[Math.floor(Math.random() * agencies.length)]
-            addLink(o.domain, agency, Math.random() * 2 + 1)
-          }
-        })
-
-        // Cross-linking logic based on country or bias
-        outlets.forEach((o1, i) => {
-          outlets.slice(i + 1).forEach(o2 => {
-            if (o1.country_code === o2.country_code && Math.random() > 0.6) {
-              addLink(o1.domain, o2.domain, 2)
-            }
-          })
-        })
-
-        setNodes(newNodes)
-        setLinks(newLinks)
-      } finally {
-        setLoading(false)
-      }
+    // Use SSR-provided initialOutlets instead of re-fetching from Supabase
+    if (!initialOutlets || initialOutlets.length === 0) {
+      setLoading(false)
+      return
     }
 
-    loadRealData()
-  }, [cx, cy])
+    try {
+      setLoading(true)
+
+      // Generate Rich Topology based on REAL nodes from server props
+      const newNodes: Node[] = initialOutlets.map(o => ({
+        id: o.domain,
+        name: o.name,
+        alertLevel: o.alertLevel || 'bajo',
+        score: o.currentVeritasAvg,
+        val: 2, 
+        x: cx + (Math.random() - 0.5) * 800,
+        y: cy + (Math.random() - 0.5) * 800,
+        vx: 0, vy: 0,
+        inDegree: 0, outDegree: 0,
+        color: getScoreColor(o.currentVeritasAvg)
+      }))
+
+      const newLinks: Link[] = []
+      
+      const addLink = (source: string, target: string, weight = 1) => {
+        newLinks.push({ id: `${source}-${target}`, source, target, weight })
+        const s = newNodes.find(n => n.id === source)
+        const t = newNodes.find(n => n.id === target)
+        if (s) s.outDegree += 1
+        if (t) {
+          t.inDegree += 1
+          t.val += 0.5 * weight
+        }
+      }
+
+      // Logic to generate links between real nodes
+      const agencies = initialOutlets.filter(o => ['reuters.com', 'apnews.com', 'bloomberg.com'].includes(o.domain)).map(o => o.domain)
+      
+      initialOutlets.forEach(o => {
+        if (!agencies.includes(o.domain) && Math.random() > 0.4 && agencies.length > 0) {
+          const agency = agencies[Math.floor(Math.random() * agencies.length)]
+          addLink(o.domain, agency, Math.random() * 2 + 1)
+        }
+      })
+
+      // Cross-linking logic based on country
+      initialOutlets.forEach((o1, i) => {
+        initialOutlets.slice(i + 1).forEach(o2 => {
+          if (o1.countryCode === o2.countryCode && Math.random() > 0.6) {
+            addLink(o1.domain, o2.domain, 2)
+          }
+        })
+      })
+
+      setNodes(newNodes)
+      setLinks(newLinks)
+    } finally {
+      setLoading(false)
+    }
+  }, [initialOutlets, cx, cy])
 
   // Physics Simulation Loop
   const requestRef = useRef<number | null>(null)

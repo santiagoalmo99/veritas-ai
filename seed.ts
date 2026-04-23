@@ -1,5 +1,5 @@
 import { supabaseAdmin } from './lib/supabase-admin'
-import { MEDIA_OUTLETS } from './lib/mock-data'
+import { MEDIA_OUTLETS } from './lib/seed-data'
 
 async function seed() {
   console.log('🌱 Seeding Media Outlets to Supabase...')

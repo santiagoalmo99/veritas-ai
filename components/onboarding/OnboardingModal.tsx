@@ -84,10 +84,10 @@ export function OnboardingModal() {
           className="onboarding-modal"
         >
           {/* Progress bar */}
-          <div className="h-[3px] bg-[var(--border-subtle)] rounded-full overflow-hidden">
+          <div className="h-[3px] bg-[var(--color-border-soft)] rounded-full overflow-hidden">
             <motion.div
               className="h-full rounded-full"
-              style={{ background: 'var(--accent-primary)' }}
+              style={{ background: 'var(--color-accent)' }}
               initial={{ width: '0%' }}
               animate={{
                 width:
@@ -151,40 +151,40 @@ function StepDetect({ geoLoading, geo }: { geoLoading: boolean; geo: ReturnType<
     >
       {/* Logo mark */}
       <div className="relative w-20 h-20 rounded-2xl flex items-center justify-center
-        bg-[var(--accent-primary)]/10 border border-[var(--accent-primary)]/20">
-        <Sparkles size={36} className="text-[var(--accent-primary)]" />
-        <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-[var(--accent-primary)] 
+        bg-[var(--color-accent)]/10 border border-[var(--color-accent)]/20">
+        <Sparkles size={36} className="text-[var(--color-accent)]" />
+        <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-[var(--color-accent)] 
           animate-pulse-glow" />
       </div>
 
       <div>
-        <h1 className="font-display text-2xl font-bold text-[var(--text-primary)] mb-2">
+        <h1 className="font-display text-2xl font-bold text-[var(--color-text-primary)] mb-2">
           {t.welcome}
         </h1>
-        <p className="text-[var(--text-secondary)] text-sm max-w-sm">
+        <p className="text-[var(--color-text-secondary)] text-sm max-w-sm">
           {t.welcomeDesc}
         </p>
       </div>
 
       {/* Detection state */}
-      <div className="flex items-center gap-3 px-4 py-3 rounded-xl surface text-sm">
+      <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-[var(--color-surface-1)] border border-[var(--color-border-soft)] text-sm">
         {geoLoading ? (
           <>
-            <Loader2 size={16} className="animate-spin text-[var(--accent-primary)]" />
-            <span className="text-[var(--text-secondary)]">{t.detectingLocation}</span>
+            <Loader2 size={16} className="animate-spin text-[var(--color-accent)]" />
+            <span className="text-[var(--color-text-secondary)]">{t.detectingLocation}</span>
           </>
         ) : geo ? (
           <>
             <span className="text-xl">{geo.flag}</span>
-            <span className="text-[var(--text-secondary)]">
-              {t.detectedLocation} <strong className="text-[var(--text-primary)]">{geo.countryName}</strong>
+            <span className="text-[var(--color-text-secondary)]">
+              {t.detectedLocation} <strong className="text-[var(--color-text-primary)]">{geo.countryName}</strong>
             </span>
             <Check size={16} className="text-[var(--score-safe)] ml-auto" />
           </>
         ) : (
           <>
-            <Globe2 size={16} className="text-[var(--text-tertiary)]" />
-            <span className="text-[var(--text-secondary)]">{t.manualSelect}</span>
+            <Globe2 size={16} className="text-[var(--color-text-tertiary)]" />
+            <span className="text-[var(--color-text-secondary)]">{t.manualSelect}</span>
           </>
         )}
       </div>
@@ -214,15 +214,15 @@ function StepCountry({
     >
       <div>
         <div className="flex items-center gap-2 mb-1">
-          <MapPin size={18} className="text-[var(--accent-primary)]" />
-          <span className="text-xs font-medium font-display text-[var(--accent-primary)] uppercase tracking-wider">
+          <MapPin size={18} className="text-[var(--color-accent)]" />
+          <span className="text-xs font-medium font-display text-[var(--color-accent)] uppercase tracking-wider">
             {t.stepTitle(1, 2)}
           </span>
         </div>
-        <h2 className="font-display text-xl font-bold text-[var(--text-primary)]">
+        <h2 className="font-display text-xl font-bold text-[var(--color-text-primary)]">
           {t.newsLocation}
         </h2>
-        <p className="text-sm text-[var(--text-secondary)] mt-1">
+        <p className="text-sm text-[var(--color-text-secondary)] mt-1">
           {t.newsLocationDesc}
         </p>
       </div>
@@ -236,8 +236,8 @@ function StepCountry({
             className={cn(
               'flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all duration-200',
               selectedCountry === country.code
-                ? 'bg-[var(--accent-primary)]/10 border-[var(--accent-primary)]/40 text-[var(--text-primary)]'
-                : 'bg-[var(--bg-elevated)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:border-[var(--border-default)] hover:text-[var(--text-primary)]'
+                ? 'bg-[var(--color-accent)]/10 border-[var(--color-accent)]/40 text-[var(--color-text-primary)]'
+                : 'bg-[var(--color-surface-1)] border-[var(--color-border-soft)] text-[var(--color-text-secondary)] hover:border-[var(--color-border)] hover:text-[var(--color-text-primary)]'
             )}
           >
             <span className="text-2xl">{country.flag}</span>
@@ -245,15 +245,15 @@ function StepCountry({
               <p className="text-sm font-medium font-display leading-tight truncate">
                 {isEn ? country.name : country.nameEs}
               </p>
-              <p className="text-[0.68rem] text-[var(--text-tertiary)]">
+              <p className="text-[0.68rem] text-[var(--color-text-tertiary)]">
                 {country.language.toUpperCase()}
               </p>
             </div>
             {selectedCountry === country.code && (
-              <Check size={14} className="ml-auto text-[var(--accent-primary)] shrink-0" />
+              <Check size={14} className="ml-auto text-[var(--color-accent)] shrink-0" />
             )}
             {detectedCountry === country.code && selectedCountry !== country.code && (
-              <span className="ml-auto text-[0.6rem] text-[var(--accent-secondary)] font-medium shrink-0">
+              <span className="ml-auto text-[0.6rem] text-[var(--color-accent)] font-medium shrink-0">
                 {t.detected}
               </span>
             )}
@@ -301,15 +301,15 @@ function StepTopics({
     >
       <div>
         <div className="flex items-center gap-2 mb-1">
-          <Sparkles size={18} className="text-[var(--accent-primary)]" />
-          <span className="text-xs font-medium font-display text-[var(--accent-primary)] uppercase tracking-wider">
+          <Sparkles size={18} className="text-[var(--color-accent)]" />
+          <span className="text-xs font-medium font-display text-[var(--color-accent)] uppercase tracking-wider">
             {t.stepTitle(2, 2)}
           </span>
         </div>
-        <h2 className="font-display text-xl font-bold text-[var(--text-primary)]">
+        <h2 className="font-display text-xl font-bold text-[var(--color-text-primary)]">
           {t.topicsInterest}
         </h2>
-        <p className="text-sm text-[var(--text-secondary)] mt-1">
+        <p className="text-sm text-[var(--color-text-secondary)] mt-1">
           {t.topicsInterestDesc(minTopics)}
         </p>
       </div>
@@ -337,7 +337,7 @@ function StepTopics({
       </div>
 
       {/* Selection count */}
-      <div className="flex items-center justify-between text-xs text-[var(--text-tertiary)]">
+      <div className="flex items-center justify-between text-xs text-[var(--color-text-tertiary)]">
         <button onClick={onBack} className="btn btn-ghost text-xs py-1 px-2">
           {t.back}
         </button>
@@ -367,9 +367,9 @@ function StepTopics({
         )}
       </button>
 
-      <p className="text-center text-[0.7rem] text-[var(--text-tertiary)]">
+      <p className="text-center text-[0.7rem] text-[var(--color-text-tertiary)]">
         {t.privacyDesign.replace(t.privacyDesignAccent, '')}
-        <span className="text-[var(--accent-secondary)]">{t.privacyDesignAccent}</span>
+        <span className="text-[var(--color-accent)]">{t.privacyDesignAccent}</span>
       </p>
     </motion.div>
   )

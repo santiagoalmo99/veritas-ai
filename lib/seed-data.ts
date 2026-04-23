@@ -1,5 +1,6 @@
-// VeritasAI — System Master Data
-// 100% Real-Time & Database Driven Data Policy
+// VeritasAI — Seed / Reference Data
+// Used ONLY for initial database population (seed scripts)
+// Production code reads from Supabase — never import this in runtime routes
 
 import { Technique, MediaOutlet, Topic } from './types'
 
