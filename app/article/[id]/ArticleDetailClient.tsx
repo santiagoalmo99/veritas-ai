@@ -31,7 +31,14 @@ export function ArticleDetailClient({ article: initialArticle }: { article: Arti
   const isEn = initialArticle.language === 'en'
 
   const { result, loading, phaseLabel, progressMs, analyze, error } = useAnalysis(initialArticle)
-  const article = (result as Article) ?? initialArticle
+  
+  // Merge result data into article object for display
+  const article = result ? {
+    ...initialArticle,
+    ...result,
+    title: result.title || initialArticle.title,
+    content: result.content || initialArticle.content
+  } as Article : initialArticle
   const needsAnalysis = article.analysisStatus === 'pending' || article.analysisStatus === undefined
 
   // Auto-trigger analysis if pending
