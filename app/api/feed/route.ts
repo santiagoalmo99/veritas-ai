@@ -117,7 +117,7 @@ async function fetchRssFallback(lang: string, country: string) {
       if (excerpt && !excerpt.endsWith('.')) excerpt += '...'
       const image_url = imgMatch ? imgMatch[1] : null
 
-      return {
+      return mapToArticle({
         id: `rss-${Date.now()}-${i}`,
         url: articleUrl,
         title,
@@ -134,11 +134,34 @@ async function fetchRssFallback(lang: string, country: string) {
            domain: lang === 'en' ? 'bbc.co.uk' : lang === 'pt' ? 'globo.com' : 'elpais.com',
            currentVeritasAvg: 65 + Math.floor(Math.random() * 20)
         }
-      }
+      })
     }).slice(0, 15) // Max 15 articles
   } catch (e) {
     console.error('RSS Fallback failed:', e)
     return []
+  }
+}
+
+// ── Helper to map snake_case to camelCase Article ─────────────────
+function mapToArticle(art: any): any {
+  return {
+    id: art.id,
+    url: art.url,
+    title: art.title,
+    titleNeutralized: art.title_neutralized || art.titleNeutralized || null,
+    excerpt: art.excerpt || '',
+    imageUrl: art.image_url || art.imageUrl || null,
+    outlet: art.outlet || null,
+    publishedAt: art.published_at || art.publishedAt || new Date().toISOString(),
+    category: art.category || 'noticia',
+    countryCode: art.country_code || art.countryCode || 'CO',
+    language: art.language || 'es',
+    veritasScore: art.veritas_score || art.veritasScore || null,
+    analysisStatus: art.analysis_status || art.analysisStatus || 'pending',
+    techniquesDetected: art.techniques_detected || art.techniquesDetected || [],
+    viewCount: art.view_count || art.viewCount || 0,
+    trendingScore: art.trending_score || art.trendingScore || 0,
+    tags: art.tags || [],
   }
 }
 
@@ -200,7 +223,7 @@ export async function GET(request: Request) {
     // 2. If DB has articles, return them directly
     if (dbArticles && dbArticles.length > 0) {
       return NextResponse.json({
-        articles: dbArticles,
+        articles: dbArticles.map(mapToArticle),
         hasMore: dbArticles.length === limit,
         source: 'supabase',
         nextPage: page + 1,
@@ -285,6 +308,9 @@ export async function GET(request: Request) {
         }
       })
 
+      // Map to frontend camelCase AFTER saving to Supabase
+      const mappedArticles = articles.map(mapToArticle)
+
       // 5. Background upsert (non-blocking) — only fields without FK constraints
       void (async () => {
         try {
@@ -306,7 +332,7 @@ export async function GET(request: Request) {
 
       // Return GDELT articles immediately (don't wait for upsert)
       return NextResponse.json({
-        articles,
+        articles: mappedArticles,
         hasMore: rawArticles.length >= limit,
         source: 'gdelt_live',
         nextPage: page + 1,
