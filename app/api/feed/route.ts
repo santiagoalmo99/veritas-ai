@@ -133,7 +133,8 @@ async function fetchRssFallback(lang: string, country: string) {
     urls = rssFeeds.es
   }
 
-  // Fetch from top 3 sources in the pool for variety
+  try {
+    // Fetch from top 3 sources in the pool for variety
     const shuffled = [...urls].sort(() => 0.5 - Math.random());
     const selectedUrls = shuffled.slice(0, 3);
 
