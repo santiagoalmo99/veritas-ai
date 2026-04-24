@@ -73,25 +73,28 @@ export function NewsCard({ article, index = 0 }: NewsCardProps) {
     return (
       <div className="mt-4 mb-4 bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-lg p-4 pointer-events-auto shadow-inner">
         <div className="flex items-center gap-2 mb-3">
-           <div className="flex items-center gap-1.5">
-              <span className={cn(
-                "w-1.5 h-1.5 rounded-full animate-pulse",
-                hasManipulation ? "bg-red-500" : "bg-emerald-500"
-              )} />
-              <span className="font-ui text-[0.65rem] font-bold tracking-widest uppercase text-[var(--color-text-secondary)]">
-                {isEn ? 'Veritas Analysis' : 'Análisis Veritas'}
-              </span>
-           </div>
-        </div>
-        
-        <div className="mb-4 pl-3 border-l-2 border-[var(--color-border)]">
-          <p className="font-ui text-sm text-[var(--color-text-primary)] leading-relaxed m-0">
-            {article.analysisStatus === 'completed' && article.summaryNeutralized
-              ? article.summaryNeutralized
-              : (article.excerpt || 'Cargando contenido...')
-            }
-          </p>
-        </div>
+            <div className="flex items-center gap-1.5">
+               <span className={cn(
+                 "w-1.5 h-1.5 rounded-full",
+                 article.analysisStatus === 'completed' 
+                   ? (hasManipulation ? "bg-red-500" : "bg-emerald-500")
+                   : "bg-[var(--color-text-disabled)] animate-pulse"
+               )} />
+               <span className="font-ui text-[0.65rem] font-bold tracking-widest uppercase text-[var(--color-text-secondary)]">
+                 {article.analysisStatus === 'completed' 
+                   ? (isEn ? 'Veritas AI Verdict' : 'Veredicto VeritasAI')
+                   : (isEn ? 'News Context' : 'Contexto de la Noticia')}
+               </span>
+            </div>
+         </div>
+         
+         <div className="mb-4 pl-3 border-l-2 border-[var(--color-border)]">
+           <p className="font-ui text-sm text-[var(--color-text-primary)] leading-relaxed m-0">
+             {article.analysisStatus === 'completed' && article.summaryNeutralized
+               ? article.summaryNeutralized
+               : article.excerpt}
+           </p>
+         </div>
 
         {hasManipulation && topTechniques.length > 0 && (
           <div className="flex flex-wrap gap-2 mb-4">

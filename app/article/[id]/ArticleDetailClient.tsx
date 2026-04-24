@@ -250,6 +250,16 @@ export function ArticleDetailClient({ article: initialArticle }: { article: Arti
                     {isEn ? "This article presents" : "Este artículo presenta"} <span className="font-black underline decoration-2 underline-offset-4" style={{ color: getScoreColor(article.veritasScore ?? 0) }}>{getScoreLabel(article.veritasScore ?? 0, isEn ? 'en' : 'es').toUpperCase()}</span>. 
                     {isEn ? ` We identified ${article.techniquesDetected?.length} precision patterns of semantic manipulation.` : ` Hemos identificado ${article.techniquesDetected?.length} patrones precisos de manipulación semántica.`}
                   </p>
+                  
+                  {/* Real Forensic Summary (Verdict) */}
+                  <div className="mt-4 p-4 rounded-xl bg-[var(--color-bg-base)]/40 border border-white/5">
+                    <p className="font-ui text-base text-[var(--color-text-primary)] leading-relaxed m-0 italic font-medium">
+                      {article.analysisStatus === 'completed' 
+                        ? `"${article.summaryNeutralized || (isEn ? 'No forensic summary generated.' : 'Veredicto no disponible.')}"`
+                        : (isEn ? "Gathering forensic evidence..." : "Recopilando evidencia forense...")
+                      }
+                    </p>
+                  </div>
                   <div className="pt-2 flex flex-wrap gap-4 items-center border-t border-[var(--color-border-soft)]">
                     <div className="flex items-center gap-2">
                       <div className="w-2 h-2 rounded-full" style={{ backgroundColor: getScoreColor(article.veritasScore ?? 0) }} />
