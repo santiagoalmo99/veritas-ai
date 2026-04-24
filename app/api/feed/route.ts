@@ -98,17 +98,45 @@ async function fetchRssFallback(lang: string, country: string) {
   // RSS Fallback sources by language/country
   const feedLang = country === 'BR' ? 'pt' : (country === 'USA' || country === 'GB' || country === 'US') ? 'en' : 'es'
   
-  const rssFeeds: Record<string, string> = {
-    es: 'https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/portada',
-    en: 'https://feeds.bbci.co.uk/news/world/rss.xml',
-    pt: 'https://g1.globo.com/rss/g1/',
+  const rssFeeds: Record<string, string[]> = {
+    es: [
+      'https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/portada',
+      'https://e00-elmundo.uecdn.es/elmundo/rss/portada.xml',
+      'https://www.abc.es/rss/feeds/abc_espana_espana.xml'
+    ],
+    en: [
+      'http://rss.cnn.com/rss/edition.rss',
+      'https://feeds.bbci.co.uk/news/world/rss.xml',
+      'https://rss.nytimes.com/services/xml/rss/nyt/World.xml',
+      'http://feeds.washingtonpost.com/rss/world'
+    ],
+    pt: [
+      'https://g1.globo.com/rss/g1/',
+      'http://rss.uol.com.br/feed/noticias.xml'
+    ],
   }
 
-  // Override with country-specific if available
-  let url = rssFeeds[feedLang]
-  if (country === 'CO') url = 'https://www.eltiempo.com/rss/colombia.xml'
-  if (country === 'USA' || country === 'US') url = 'http://rss.cnn.com/rss/cnn_topstories.rss'
-  if (country === 'ES') url = 'https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/portada'
+  // Country specific overrides
+  let urls = rssFeeds[feedLang]
+  if (country === 'CO') {
+    urls = [
+      'https://www.eltiempo.com/rss/colombia.xml',
+      'https://www.elespectador.com/arc/outboundfeeds/rss/colombia/',
+      'https://www.semana.com/arc/outboundfeeds/rss/nacion/'
+    ]
+  } else if (country === 'USA' || country === 'US') {
+    urls = [
+      'http://rss.cnn.com/rss/cnn_topstories.rss',
+      'https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml',
+      'http://feeds.washingtonpost.com/rss/politics',
+      'https://moxie.foxnews.com/google-publisher/politics.xml'
+    ]
+  } else if (country === 'ES') {
+    urls = rssFeeds.es
+  }
+
+  // Pick a random URL from the pool to ensure variety
+  const url = urls[Math.floor(Math.random() * urls.length)]
 
   try {
     const res = await fetch(url, { next: { revalidate: 300 } })
@@ -131,6 +159,15 @@ async function fetchRssFallback(lang: string, country: string) {
       // Encode URL in ID to make it reconstructible in the detail page if not in DB
       const encodedUrl = Buffer.from(articleUrl).toString('base64url')
 
+      // Parse domain from articleUrl to dynamically mock the outlet
+      let domainStr = 'news.google.com'
+      let nameStr = 'Global News'
+      try {
+        const parsed = new URL(articleUrl)
+        domainStr = parsed.hostname.replace('www.', '')
+        nameStr = domainStr.split('.')[0].toUpperCase()
+      } catch(e) {}
+
       return mapToArticle({
         id: `rss-${encodedUrl}`,
         url: articleUrl,
@@ -142,11 +179,11 @@ async function fetchRssFallback(lang: string, country: string) {
         trending_score: 0.8 + Math.random() * 0.2,
         language: lang,
         country_code: country,
-        // Mock outlet to satisfy UI without needing Supabase FK
+        // Dynamic mock outlet based on the URL
         outlet: {
-           name: country === 'CO' ? 'El Tiempo' : country === 'USA' || country === 'US' ? 'CNN' : lang === 'en' ? 'BBC News' : lang === 'pt' ? 'G1 Globo' : 'El País',
-           domain: country === 'CO' ? 'eltiempo.com' : country === 'USA' || country === 'US' ? 'cnn.com' : lang === 'en' ? 'bbc.co.uk' : lang === 'pt' ? 'globo.com' : 'elpais.com',
-           currentVeritasAvg: 65 + Math.floor(Math.random() * 20)
+           name: nameStr,
+           domain: domainStr,
+           currentVeritasAvg: 50 + Math.floor(Math.random() * 20)
         }
       })
     }).slice(0, 15) // Max 15 articles
@@ -268,7 +305,7 @@ export async function GET(request: Request) {
       // Bulletproof timeout using Promise.race (avoids AbortSignal edge cases)
       const fetchPromise = fetch(`${GDELT_API_URL}?${gdeltParams.toString()}`)
       const timeoutPromise = new Promise<Response>((_, reject) => {
-        setTimeout(() => reject(new Error('GDELT Timeout')), 6000)
+        setTimeout(() => reject(new Error('GDELT Timeout')), 8500)
       })
       
       const gdeltRes = await Promise.race([fetchPromise, timeoutPromise])
