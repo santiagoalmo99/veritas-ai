@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { 
   ArrowLeft, Clock, Eye, ExternalLink, Shield, Globe, User, 
   AlertCircle, ChevronDown, EyeOff, CheckCircle, AlertTriangle,
-  Bot
+  Bot, Loader2
 } from 'lucide-react'
 import type { Article } from '@/lib/types'
 import { getScoreColor, getScoreLevel, getScoreLabel } from '@/lib/types'
@@ -148,7 +148,7 @@ export function ArticleDetailClient({ article: initialArticle }: { article: Arti
 
               <div className="space-y-6">
                 {/* Title Hierarchy: ORIGINAL FIRST */}
-                {isAnalyzing ? (
+                {loading ? (
                   <div className="space-y-4 py-4 animate-pulse">
                     <div className="h-10 bg-[var(--color-surface-2)] rounded-2xl w-3/4 border border-[var(--color-border-soft)]" />
                     <div className="h-10 bg-[var(--color-surface-2)] rounded-2xl w-1/2 border border-[var(--color-border-soft)]" />
