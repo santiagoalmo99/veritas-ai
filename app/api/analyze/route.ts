@@ -30,7 +30,7 @@ const openrouter = createOpenAI({
 const AnalysisSchema = z.object({
   title_neutralized: z.string().describe('A completely neutral, objective version of the article headline.'),
   summary_neutralized: z.string().describe('A completely neutral 2-sentence summary of the factual events.'),
-  primary_intent: z.enum(['inform', 'persuade', 'manipulate', 'clickbait']).describe('The primary intention of the article.'),
+  primary_intent: z.enum(['inform', 'persuade', 'manipulate', 'clickbait', 'agitate', 'deceive']).describe('The primary intention of the article.'),
   veritas_score: z.number().min(0).max(100).describe('Manipulation Risk Score (0 = completely neutral/safe, 100 = extreme propaganda/manipulation).'),
   analysis_confidence: z.number().min(0).max(1).describe('Confidence level of this AI analysis (0.0 to 1.0).'),
   detected_techniques: z.array(z.object({
@@ -150,8 +150,8 @@ Fragmento de texto: ${content.substring(0, 4500)}`
         system: systemPrompt,
         prompt: userPrompt,
       });
-    } catch (e) {
-      console.warn("Cerebras failed, falling back to Groq:", e);
+    } catch (e: any) {
+      console.warn("Cerebras failed, falling back to Groq:", e.message);
       try {
         result = await generateObject({
           model: groq('llama-3.1-70b-versatile'),
@@ -159,14 +159,18 @@ Fragmento de texto: ${content.substring(0, 4500)}`
           system: systemPrompt,
           prompt: userPrompt,
         });
-      } catch (e2) {
-        console.warn("Groq failed, falling back to OpenRouter:", e2);
-        result = await generateObject({
-          model: openrouter('meta-llama/llama-3.1-70b-instruct'),
-          schema: AnalysisSchema,
-          system: systemPrompt,
-          prompt: userPrompt,
-        });
+      } catch (e2: any) {
+        console.warn("Groq failed, falling back to OpenRouter:", e2.message);
+        try {
+          result = await generateObject({
+            model: openrouter('meta-llama/llama-3.1-70b-instruct'),
+            schema: AnalysisSchema,
+            system: systemPrompt,
+            prompt: userPrompt,
+          });
+        } catch (e3: any) {
+          console.error("All AI providers failed or validation error:", e3.message);
+        }
       }
     }
 

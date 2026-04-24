@@ -28,6 +28,7 @@ const ALERT_LEVEL_CONFIG = {
 export function ArticleDetailClient({ article: initialArticle }: { article: Article }) {
   const [imageError, setImageError] = useState(false)
   const [showNeutralized, setShowNeutralized] = useState(false)
+  const [hasAttemptedAnalysis, setHasAttemptedAnalysis] = useState(false)
   
   const { result, loading, phaseLabel, progressMs, analyze, error } = useAnalysis(initialArticle)
   
@@ -50,10 +51,11 @@ export function ArticleDetailClient({ article: initialArticle }: { article: Arti
 
   // Auto-trigger analysis if pending
   useEffect(() => {
-    if (needsAnalysis && !loading && article.url) {
+    if (needsAnalysis && !loading && !hasAttemptedAnalysis && article.url) {
+      setHasAttemptedAnalysis(true)
       analyze()
     }
-  }, [needsAnalysis, loading, article.url, analyze])
+  }, [needsAnalysis, loading, article.url, analyze, hasAttemptedAnalysis])
 
   // Localized Labels
   const labels = {
