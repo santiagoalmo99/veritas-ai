@@ -5,6 +5,7 @@ import { generateObject } from 'ai'
 import { createOpenAI } from '@ai-sdk/openai'
 import { z } from 'zod'
 import { supabaseAdmin } from '@/lib/supabase-admin'
+import { TECHNIQUES } from '@/lib/seed-data'
 
 // ── INTELLIGENCE CASCADE CONFIG ─────────────────────────────
 // 1. Cerebras (Primary)
@@ -127,6 +128,9 @@ El VeritasScore (0-100) es un TERMÓMETRO DE TOXICIDAD EDITORIAL:
 - 31-60: Sesgado, usa lenguaje cargado.
 - 61-100: Propaganda agresiva, manipulación cognitiva detectada.
 
+STRICT INSTRUCTION FOR TECHNIQUES:
+- Use English standardized slugs for `technique_slug` (e.g., "loaded-language", "fear-mongering", "anchoring-bias", "false-dilemma", "moral-engineering", "ad-hominem", "cherry-picking", "framing-bias", "emotional-manipulation").
+
 IMPORTANT: Respond in the SAME LANGUAGE as the article provided (e.g., if the article is in English, respond in English. If it is in Spanish, respond in Spanish).`
 
     let result;
@@ -210,21 +214,27 @@ Fragmento de texto: ${content.substring(0, 4500)}`
     }
 
     // 4. Return results in frontend-friendly format (camelCase)
-    const techniques = (analysis.detected_techniques || []).map((t: any) => ({
-      technique: {
-        slug: t.technique_slug,
-        name: t.technique_slug.split('-').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
-        nameEs: t.technique_slug.split('-').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
-        category: 'cognitive',
-        severity: t.confidence,
-        description: t.explanation,
-        descriptionEs: t.explanation,
-        icon: 'alert-triangle'
-      },
-      quote: t.quote,
-      confidence: t.confidence,
-      explanation: t.explanation
-    }))
+    const techniques = (analysis.detected_techniques || []).map((t: any) => {
+      const slug = (t.technique_slug || '').toLowerCase().replace(/ /g, '-');
+      // Find matching technique in our seed data if possible
+      const ref = TECHNIQUES.find(r => r.slug === slug);
+      
+      return {
+        technique: {
+          slug,
+          name: ref?.name || slug.split('-').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
+          nameEs: ref?.nameEs || slug.split('-').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
+          category: ref?.category || 'cognitive',
+          severity: t.confidence || 0.8,
+          description: t.explanation,
+          descriptionEs: t.explanation,
+          icon: ref?.icon || 'alert-triangle'
+        },
+        quote: t.quote,
+        confidence: t.confidence || 0.85,
+        explanation: t.explanation
+      };
+    })
 
     const analysisLogs = [
       { stepId: 'INGESTION', status: 'completed', timestamp: '0.1s', technicalDetail: 'Article content scraped successfully', technicalDetailEs: 'Contenido del artículo extraído con éxito' },

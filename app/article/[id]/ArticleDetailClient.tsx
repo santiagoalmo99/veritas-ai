@@ -427,7 +427,7 @@ export function ArticleDetailClient({ article: initialArticle }: { article: Arti
               </div>
               <div className="glass-card divide-y divide-[var(--color-border-soft)] overflow-hidden border border-[var(--color-border-soft)]">
                 {article.techniquesDetected?.map((dt, i) => (
-                  <TechniqueAccordion key={i} dt={dt} index={i} />
+                  <TechniqueAccordion key={i} dt={dt} index={i} isEn={isEn} />
                 ))}
               </div>
             </div>

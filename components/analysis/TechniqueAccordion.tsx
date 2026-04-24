@@ -18,9 +18,10 @@ import { DetectedTechnique } from '@/lib/types'
 interface Props {
   dt: DetectedTechnique
   index: number
+  isEn?: boolean
 }
 
-export function TechniqueAccordion({ dt, index }: Props) {
+export function TechniqueAccordion({ dt, index, isEn = false }: Props) {
   const [isOpen, setIsOpen] = useState(index === 0)
 
   return (
@@ -43,7 +44,7 @@ export function TechniqueAccordion({ dt, index }: Props) {
           </div>
           <div className="space-y-0.5">
             <h4 className="text-[13px] font-display font-bold text-[var(--color-text-primary)] uppercase tracking-tight">
-              {dt.technique.nameEs}
+              {isEn ? dt.technique.name : dt.technique.nameEs}
             </h4>
             <div className="flex items-center gap-2">
               <span className="text-[9px] font-mono font-bold text-[var(--color-accent)] opacity-80">
@@ -75,7 +76,7 @@ export function TechniqueAccordion({ dt, index }: Props) {
             <div className="pb-8 px-6 space-y-6">
               {/* Evidence Quote */}
               <div className="space-y-2">
-                <span className="forensic-label">Evidencia Textual</span>
+                <span className="forensic-label">{isEn ? 'Textual Evidence' : 'Evidencia Textual'}</span>
                 <div className="relative p-4 rounded-xl bg-[var(--color-bg-base)] border border-[var(--color-border-soft)] border-dashed">
                   <Quote className="absolute -left-2 -top-2 text-[var(--color-accent)] opacity-20" size={16} />
                   <p className="text-[13px] italic text-[var(--color-text-secondary)] leading-relaxed font-serif">
@@ -87,8 +88,7 @@ export function TechniqueAccordion({ dt, index }: Props) {
               {/* Forensic Rationale */}
               <div className="space-y-3">
                 <div className="flex items-center gap-2">
-                  <Info size={12} className="text-[var(--color-accent)]" />
-                  <span className="forensic-label mb-0">Racional Forense</span>
+                  <span className="forensic-label mb-0">{isEn ? 'Forensic Rationale' : 'Racional Forense'}</span>
                 </div>
                 <div className="p-4 rounded-xl bg-gradient-to-br from-[var(--color-bg-base)] to-[var(--color-surface-2)] border border-[var(--color-border-soft)]">
                   <p className="text-[13px] text-[var(--color-text-secondary)] leading-relaxed">

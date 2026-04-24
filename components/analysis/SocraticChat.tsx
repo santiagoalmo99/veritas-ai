@@ -72,10 +72,12 @@ export function SocraticChat({ article }: SocraticChatProps) {
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-[13px] font-display font-bold text-[var(--color-text-primary)] uppercase tracking-tight">
-            Veritas — Tutor Socrático
+            {article.language === 'en' ? 'Veritas — Socratic Tutor' : 'Veritas — Tutor Socrático'}
           </p>
           <p className="text-[10px] text-[var(--text-secondary)] uppercase tracking-wider font-medium truncate">
-            {isExpanded ? 'Conversación activa' : 'Análisis conversacional'}
+            {isExpanded 
+              ? (article.language === 'en' ? 'Active Conversation' : 'Conversación activa')
+              : (article.language === 'en' ? 'Conversational Analysis' : 'Análisis conversacional')}
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -197,7 +199,7 @@ export function SocraticChat({ article }: SocraticChatProps) {
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    placeholder="Escribe una pregunta forense..."
+                    placeholder={article.language === 'en' ? "Ask a forensic question..." : "Escribe una pregunta forense..."}
                     rows={1}
                     className="w-full bg-[var(--color-bg-base)] border border-[var(--color-border-soft)] rounded-xl px-4 py-2.5
                       text-[13px] text-[var(--color-text-primary)] placeholder:text-[var(--text-tertiary)]
@@ -232,7 +234,7 @@ export function SocraticChat({ article }: SocraticChatProps) {
 
               <div className="bg-[var(--color-surface-2)] px-4 pb-3">
                 <p className="text-[9px] text-[var(--text-tertiary)] text-center font-mono uppercase tracking-[0.1em] opacity-60">
-                  Método Socrático · Motor VeritasAI v2.4
+                  {article.language === 'en' ? 'Socratic Method · VeritasAI Engine v2.4' : 'Método Socrático · Motor VeritasAI v2.4'}
                 </p>
               </div>
             </div>
