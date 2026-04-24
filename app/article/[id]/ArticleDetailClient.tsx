@@ -36,8 +36,14 @@ export function ArticleDetailClient({ article: initialArticle }: { article: Arti
   const article = result ? {
     ...initialArticle,
     ...result,
-    title: (result.title && result.title !== "Cargando análisis forense...") ? result.title : (result.titleNeutralized || initialArticle.title),
-    content: result.content || initialArticle.content
+    // Keep original title from scrape; only fall back to initialArticle if placeholder
+    title: (result.title && result.title !== "Cargando análisis forense..." && result.title !== "Analizando noticia...")
+      ? result.title
+      : initialArticle.title,
+    // Explicitly surface the fields that the hook now maps correctly
+    primaryIntent: result.primaryIntent ?? initialArticle.primaryIntent,
+    analysisLogs: (result.analysisLogs && result.analysisLogs.length > 0) ? result.analysisLogs : (initialArticle.analysisLogs ?? []),
+    content: result.content || initialArticle.content,
   } as Article : initialArticle
   const needsAnalysis = article.analysisStatus === 'pending' || article.analysisStatus === undefined
 

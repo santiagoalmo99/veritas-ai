@@ -47,7 +47,7 @@ export function useAnalysis(article: Partial<Article> | null) {
 
   const analyze = useCallback(async (targetArticle?: Partial<Article>) => {
     const art = targetArticle ?? article
-    if (!art?.url && !art?.title) return
+    if (!art?.url && !art?.title && !art?.excerpt) return
 
     setState((s) => ({ ...s, loading: true, phase: 'dispatching', phaseLabel: PHASE_LABELS.dispatching, error: null }))
     startRef.current = Date.now()
@@ -97,13 +97,12 @@ export function useAnalysis(article: Partial<Article> | null) {
           techniquesDetected: data.techniquesDetected ?? [],
           titleNeutralized: data.titleNeutralized,
           summaryNeutralized: data.summaryNeutralized,
+          primaryIntent: data.primaryIntent ?? art.primaryIntent,
+          analysisLogs: data.analysisLogs ?? [],
           category: data.category ?? art.category,
-          // Keep score breakdown for advanced view
-          _scoreBreakdown: data.scoreBreakdown,
-          _primaryIntent: data.primaryIntent,
-          _coordinationRisk: data.coordinationRisk,
-          _analysisProvider: data.analysisProvider,
-        } as Partial<Article> & Record<string, unknown>,
+          title: data.title ?? art.title,
+          content: data.content ?? art.content,
+        } as Partial<Article>,
       })
     } catch (err) {
       clearPhaseTimers()
