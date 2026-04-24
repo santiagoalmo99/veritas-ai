@@ -88,7 +88,7 @@ function buildGdeltQuery(country: string, category: string): string {
 
 // ── Country → content language code ───────────────────────────
 function getContentLanguage(country: string): string {
-  if (['US', 'GB', 'CA', 'AU'].includes(country)) return 'en'
+  if (['US', 'USA', 'GB', 'CA', 'AU'].includes(country)) return 'en'
   if (['BR', 'PT'].includes(country)) return 'pt'
   return 'es'
 }
@@ -105,10 +105,12 @@ async function fetchRssFallback(lang: string, country: string) {
       'https://www.abc.es/rss/feeds/abc_espana_espana.xml'
     ],
     en: [
-      'http://rss.cnn.com/rss/edition.rss',
-      'https://feeds.bbci.co.uk/news/world/rss.xml',
-      'https://rss.nytimes.com/services/xml/rss/nyt/World.xml',
-      'http://feeds.washingtonpost.com/rss/world'
+      'http://rss.cnn.com/rss/cnn_topstories.rss',
+      'https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml',
+      'http://feeds.washingtonpost.com/rss/politics',
+      'https://moxie.foxnews.com/google-publisher/politics.xml',
+      'https://www.reutersagency.com/feed/',
+      'https://apnews.com/hub/politics.rss'
     ],
     pt: [
       'https://g1.globo.com/rss/g1/',
@@ -122,15 +124,11 @@ async function fetchRssFallback(lang: string, country: string) {
     urls = [
       'https://www.eltiempo.com/rss/colombia.xml',
       'https://www.elespectador.com/arc/outboundfeeds/rss/colombia/',
-      'https://www.semana.com/arc/outboundfeeds/rss/nacion/'
+      'https://www.semana.com/arc/outboundfeeds/rss/nacion/',
+      'https://www.portafolio.co/rss/economia'
     ]
   } else if (country === 'USA' || country === 'US') {
-    urls = [
-      'http://rss.cnn.com/rss/cnn_topstories.rss',
-      'https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml',
-      'http://feeds.washingtonpost.com/rss/politics',
-      'https://moxie.foxnews.com/google-publisher/politics.xml'
-    ]
+    urls = rssFeeds.en
   } else if (country === 'ES') {
     urls = rssFeeds.es
   }
@@ -177,7 +175,7 @@ async function fetchRssFallback(lang: string, country: string) {
         published_at: new Date().toISOString(),
         analysis_status: 'pending',
         trending_score: 0.8 + Math.random() * 0.2,
-        language: lang,
+        language: feedLang,
         country_code: country,
         // Dynamic mock outlet based on the URL
         outlet: {

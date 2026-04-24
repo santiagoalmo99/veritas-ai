@@ -36,7 +36,7 @@ const AnalysisSchema = z.object({
     technique_slug: z.string().describe('The slug of the detected technique.'),
     quote: z.string().describe('Exact quote from the text demonstrating this technique.'),
     confidence: z.number().min(0).max(1),
-    explanation: z.string().describe('Why this quote represents this technique in Spanish.')
+    explanation: z.string().describe('Detailed forensic explanation of why this quote represents the detected technique.')
   })).max(3).describe('Top 3 manipulation techniques detected in the text.'),
   tags: z.array(z.string()).max(5).describe('Relevant topic tags.')
 })
@@ -127,7 +127,7 @@ El VeritasScore (0-100) es un TERMÓMETRO DE TOXICIDAD EDITORIAL:
 - 31-60: Sesgado, usa lenguaje cargado.
 - 61-100: Propaganda agresiva, manipulación cognitiva detectada.
 
-RESPONDE SIEMPRE EN ESPAÑOL.`
+IMPORTANT: Respond in the SAME LANGUAGE as the article provided (e.g., if the article is in English, respond in English. If it is in Spanish, respond in Spanish).`
 
     let result;
     const userPrompt = `AUDITORÍA FORENSE OBLIGATORIA:
@@ -181,6 +181,9 @@ Fragmento de texto: ${content.substring(0, 4500)}`
 
     const { object: analysis } = result;
 
+    const isEnglishArticle = content.match(/[a-zA-Z]{4,}/g)?.length ? (content.match(/the | and | or | with /gi)?.length ?? 0) > 5 : false;
+    const detectedLang = isEnglishArticle ? 'en' : 'es';
+
     // 3. Save to Supabase
     const { data: article, error: articleErr } = await supabaseAdmin.from('articles').insert({
       id: `art-${Date.now()}`,
@@ -191,8 +194,8 @@ Fragmento de texto: ${content.substring(0, 4500)}`
       outlet_id,
       published_at: new Date().toISOString(),
       category: 'general',
-      country_code: 'ALL',
-      language: 'es',
+      country_code: isEnglishArticle ? 'US' : 'CO',
+      language: detectedLang,
       veritas_score: analysis.veritas_score,
       analysis_status: 'completed',
       analysis_confidence: analysis.analysis_confidence,
@@ -240,6 +243,7 @@ Fragmento de texto: ${content.substring(0, 4500)}`
       primaryIntent: analysis.primary_intent,
       tags: analysis.tags,
       analysisLogs,
+      language: detectedLang,
       title: title, // Returning original scraped title
       content: content // Returning original scraped content
     })

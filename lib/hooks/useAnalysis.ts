@@ -102,6 +102,7 @@ export function useAnalysis(article: Partial<Article> | null) {
           category: data.category ?? art.category,
           title: data.title ?? art.title,
           content: data.content ?? art.content,
+          language: data.language || art.language,
         } as Partial<Article>,
       })
     } catch (err) {

@@ -28,8 +28,7 @@ const ALERT_LEVEL_CONFIG = {
 export function ArticleDetailClient({ article: initialArticle }: { article: Article }) {
   const [imageError, setImageError] = useState(false)
   const [showNeutralized, setShowNeutralized] = useState(false)
-  const isEn = initialArticle.language === 'en'
-
+  
   const { result, loading, phaseLabel, progressMs, analyze, error } = useAnalysis(initialArticle)
   
   // Merge result data into article object for display
@@ -45,6 +44,8 @@ export function ArticleDetailClient({ article: initialArticle }: { article: Arti
     analysisLogs: (result.analysisLogs && result.analysisLogs.length > 0) ? result.analysisLogs : (initialArticle.analysisLogs ?? []),
     content: result.content || initialArticle.content,
   } as Article : initialArticle
+
+  const isEn = article.language === 'en'
   const needsAnalysis = article.analysisStatus === 'pending' || article.analysisStatus === undefined
 
   // Auto-trigger analysis if pending
