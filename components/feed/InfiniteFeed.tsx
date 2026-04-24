@@ -34,7 +34,8 @@ export function InfiniteFeed({ initialCountry = 'CO', initialTopics = [] }: Infi
     source, 
     error,
     countryCode,
-    topics
+    topics,
+    firstArticleId: articles[0]?.id
   })
 
   const sentinelRef = useRef<HTMLDivElement>(null)
