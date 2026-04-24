@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic'
 const COUNTRY_GDELT_LANG: Record<string, string> = {
   CO: 'spanish', MX: 'spanish', AR: 'spanish', VE: 'spanish',
   PE: 'spanish', CL: 'spanish', EC: 'spanish', ES: 'spanish',
-  US: 'english', GB: 'english', CA: 'english', AU: 'english',
+  US: 'english', USA: 'english', GB: 'english', CA: 'english', AU: 'english',
   BR: 'portuguese', PT: 'portuguese',
 }
 

@@ -148,13 +148,24 @@ export function ArticleDetailClient({ article: initialArticle }: { article: Arti
 
               <div className="space-y-6">
                 {/* Title Hierarchy: ORIGINAL FIRST */}
-                <motion.h1 
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="article-title text-[var(--color-text-primary)]"
-                >
-                  {article.title}
-                </motion.h1>
+                {isAnalyzing ? (
+                  <div className="space-y-4 py-4 animate-pulse">
+                    <div className="h-10 bg-[var(--color-surface-2)] rounded-2xl w-3/4 border border-[var(--color-border-soft)]" />
+                    <div className="h-10 bg-[var(--color-surface-2)] rounded-2xl w-1/2 border border-[var(--color-border-soft)]" />
+                    <div className="flex items-center gap-3 mt-4">
+                      <Loader2 className="animate-spin text-[var(--color-accent)]" size={16} />
+                      <span className="text-[10px] font-bold text-[var(--color-accent)] tracking-widest uppercase">{isEn ? 'Analyzing article content...' : 'Analizando contenido forense...'}</span>
+                    </div>
+                  </div>
+                ) : (
+                  <motion.h1 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="article-title text-[var(--color-text-primary)]"
+                  >
+                    {article.title}
+                  </motion.h1>
+                )}
 
                 {/* Neutralized version as secondary reference */}
                 {article.titleNeutralized && article.titleNeutralized !== article.title && (

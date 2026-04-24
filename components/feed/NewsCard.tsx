@@ -88,9 +88,8 @@ export function NewsCard({ article, index = 0 }: NewsCardProps) {
             <div className="flex items-center gap-1.5">
                <span className={cn(
                  "w-1.5 h-1.5 rounded-full",
-                 article.analysisStatus === 'completed' 
-                   ? (hasManipulation ? "bg-red-500" : "bg-emerald-500")
-                   : "bg-[var(--color-text-disabled)] animate-pulse"
+                 article.analysisStatus === 'completed' ? "" : "animate-pulse",
+                 scoreValue > 60 ? "bg-red-500" : scoreValue > 30 ? "bg-amber-500" : "bg-emerald-500"
                )} />
                <span className="font-ui text-[0.65rem] font-bold tracking-widest uppercase text-[var(--color-text-secondary)]">
                  {article.analysisStatus === 'completed' 
