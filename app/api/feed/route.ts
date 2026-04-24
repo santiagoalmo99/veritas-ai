@@ -107,10 +107,10 @@ async function fetchRssFallback(lang: string, country: string) {
     en: [
       'http://rss.cnn.com/rss/cnn_topstories.rss',
       'https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml',
-      'http://feeds.washingtonpost.com/rss/politics',
+      'https://feeds.bbci.co.uk/news/world/rss.xml',
+      'https://www.theguardian.com/world/rss',
       'https://moxie.foxnews.com/google-publisher/politics.xml',
-      'https://www.reutersagency.com/feed/',
-      'https://apnews.com/hub/politics.rss'
+      'https://www.aljazeera.com/xml/rss/all.xml'
     ],
     pt: [
       'https://g1.globo.com/rss/g1/',
@@ -133,58 +133,76 @@ async function fetchRssFallback(lang: string, country: string) {
     urls = rssFeeds.es
   }
 
-  // Pick a random URL from the pool to ensure variety
-  const url = urls[Math.floor(Math.random() * urls.length)]
+  // Fetch from top 3 sources in the pool for variety
+    const shuffled = [...urls].sort(() => 0.5 - Math.random());
+    const selectedUrls = shuffled.slice(0, 3);
 
-  try {
-    const res = await fetch(url, { next: { revalidate: 300 } })
-    const text = await res.text()
+    const allArticles: any[] = [];
     
-    // Simple regex XML parser
-    const items = text.split(/<item[\s>]/i).slice(1)
-    return items.map((item, i) => {
-      const titleMatch = item.match(/<title><!\[CDATA\[(.*?)\]\]><\/title>/i) || item.match(/<title>(.*?)<\/title>/i)
-      const linkMatch = item.match(/<link>(.*?)<\/link>/i)
-      const descMatch = item.match(/<description><!\[CDATA\[(.*?)\]\]><\/description>/i) || item.match(/<description>(.*?)<\/description>/i)
-      const imgMatch = item.match(/<media:content[^>]*url="([^"]+)"/i) || item.match(/<enclosure[^>]*url="([^"]+)"/i)
-      
-      const title = titleMatch ? titleMatch[1].replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>') : 'Noticia Internacional'
-      const articleUrl = linkMatch ? linkMatch[1] : `https://news.google.com/?item=${i}`
-      let excerpt = descMatch ? descMatch[1].replace(/<[^>]+>/g, '').trim().slice(0, 160) : ''
-      if (excerpt && !excerpt.endsWith('.')) excerpt += '...'
-      const image_url = imgMatch ? imgMatch[1] : null
-      
-      // Encode URL in ID to make it reconstructible in the detail page if not in DB
-      const encodedUrl = Buffer.from(articleUrl).toString('base64url')
-
-      // Parse domain from articleUrl to dynamically mock the outlet
-      let domainStr = 'news.google.com'
-      let nameStr = 'Global News'
+    for (const feedUrl of selectedUrls) {
       try {
-        const parsed = new URL(articleUrl)
-        domainStr = parsed.hostname.replace('www.', '')
-        nameStr = domainStr.split('.')[0].toUpperCase()
-      } catch(e) {}
+        const res = await fetch(feedUrl, { next: { revalidate: 300 } });
+        if (!res.ok) continue;
+        const text = await res.text();
+        
+        // More robust regex XML parser
+        const items = text.split(/<item[\s>]/i).slice(1);
+        const parsed = items.map((item, i) => {
+          // Use [^]*? to match across multiple lines
+          const titleMatch = item.match(/<title>(?:<!\[CDATA\[)?([^]*?)(?:\]\]>)?<\/title>/i);
+          const linkMatch = item.match(/<link>(?:<!\[CDATA\[)?([^]*?)(?:\]\]>)?<\/link>/i);
+          const descMatch = item.match(/<description>(?:<!\[CDATA\[)?([^]*?)(?:\]\]>)?<\/description>/i);
+          const imgMatch = item.match(/<media:content[^>]*url="([^"]+)"/i) || 
+                           item.match(/<enclosure[^>]*url="([^"]+)"/i) ||
+                           item.match(/<img[^>]*src="([^"]+)"/i);
+          
+          let title = titleMatch ? titleMatch[1].trim() : 'International News';
+          title = title.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/<[^>]+>/g, '');
+          
+          let articleUrl = linkMatch ? linkMatch[1].trim() : `https://news.google.com/?item=${i}`;
+          
+          let excerpt = descMatch ? descMatch[1].replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').trim().slice(0, 200) : '';
+          if (excerpt && !excerpt.endsWith('.')) excerpt += '...';
+          
+          const image_url = imgMatch ? imgMatch[1] : null;
+          
+          const encodedUrl = Buffer.from(articleUrl).toString('base64url');
 
-      return mapToArticle({
-        id: `rss-${encodedUrl}`,
-        url: articleUrl,
-        title,
-        excerpt,
-        image_url,
-        published_at: new Date().toISOString(),
-        analysis_status: 'pending',
-        trending_score: 0.8 + Math.random() * 0.2,
-        language: feedLang,
-        country_code: country,
-        // Dynamic mock outlet based on the URL
-        outlet: {
-           name: nameStr,
-           domain: domainStr,
-           currentVeritasAvg: 50 + Math.floor(Math.random() * 20)
-        }
-      })
-    }).slice(0, 15) // Max 15 articles
+          let domainStr = 'news.google.com';
+          let nameStr = 'Global News';
+          try {
+            const parsedUrl = new URL(articleUrl);
+            domainStr = parsedUrl.hostname.replace('www.', '');
+            nameStr = domainStr.split('.')[0].toUpperCase();
+          } catch(e) {}
+
+          return mapToArticle({
+            id: `rss-${encodedUrl}`,
+            url: articleUrl,
+            title,
+            excerpt,
+            image_url,
+            published_at: new Date().toISOString(),
+            analysis_status: 'pending',
+            trending_score: 0.8 + Math.random() * 0.2,
+            language: feedLang,
+            country_code: country,
+            outlet: {
+               name: nameStr,
+               domain: domainStr,
+               currentVeritasAvg: 50 + Math.floor(Math.random() * 20)
+            }
+          });
+        });
+        allArticles.push(...parsed);
+      } catch (e) {
+        console.warn(`RSS Source failed (${feedUrl}):`, e);
+      }
+    }
+
+    return allArticles
+      .sort((a, b) => (b.trendingScore || 0) - (a.trendingScore || 0))
+      .slice(0, 15);
   } catch (e) {
     console.error('RSS Fallback failed:', e)
     return []
@@ -239,7 +257,9 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url)
     const category = searchParams.get('category') || searchParams.get('topics') || searchParams.get('topic') || 'ALL'
-    const country = searchParams.get('country') || searchParams.get('countryCode') || 'ALL'
+    const countryParam = searchParams.get('country') || searchParams.get('countryCode') || 'ALL'
+    // Standardize country code (USA -> US)
+    const country = countryParam === 'USA' ? 'US' : countryParam
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('perPage') || '12')
     const offset = (page - 1) * limit
@@ -293,7 +313,7 @@ export async function GET(request: Request) {
     const GDELT_API_URL = 'https://api.gdeltproject.org/api/v2/doc/doc'
     const gdeltParams = new URLSearchParams({
       format: 'json',
-      timespan: '24h',
+      timespan: '48h',
       query: gdeltQuery,
       maxrecords: String(Math.min(limit * 2, 50)),
       mode: 'artlist',
@@ -316,12 +336,8 @@ export async function GET(request: Request) {
       const rawArticles = gdeltData.articles || []
 
       if (rawArticles.length === 0) {
-        return NextResponse.json({
-          articles: [],
-          hasMore: false,
-          source: 'gdelt_empty',
-          message: 'No real-time news found for this region in the last 24h.',
-        })
+        console.warn(`⚠️ GDELT returned 0 articles for ${country}. Falling back to RSS.`);
+        throw new Error('GDELT_EMPTY');
       }
 
       // 4. Map GDELT articles to our schema (WITHOUT outlet_id to avoid FK violations)
