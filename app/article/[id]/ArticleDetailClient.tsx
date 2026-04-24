@@ -285,7 +285,7 @@ export function ArticleDetailClient({ article: initialArticle }: { article: Arti
                         {isEn ? "Score Mapping:" : "Mapeo de Score:"} {article.veritasScore}/100 (Inverso: +Score = +Riesgo)
                       </span>
                     </div>
-                    <Link href="/metodologia" className="text-[10px] font-bold text-[var(--color-accent)] hover:underline flex items-center gap-1 uppercase tracking-widest">
+                    <Link href="/methodology" className="text-[10px] font-bold text-[var(--color-accent)] hover:underline flex items-center gap-1 uppercase tracking-widest">
                       {isEn ? "View Methodology" : "Ver Metodología"}
                       <ExternalLink size={10} />
                     </Link>

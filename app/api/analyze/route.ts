@@ -73,7 +73,8 @@ export async function POST(req: Request) {
       const response = await fetch(url, { 
         headers: { 
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8'
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+          'Accept-Language': 'en-US,en;q=0.9,es;q=0.8'
         },
         next: { revalidate: 3600 }
       })
@@ -113,25 +114,29 @@ export async function POST(req: Request) {
     }
 
     // 2. Perform AI Forensic Analysis with Cascade
-    const systemPrompt = `Eres el Auditor Forense VeritasAI v3.0. Tu única función es auditar la MANIPULACIÓN en los medios.
-REGLAS ESTRICTAS:
-1. NO RESUMAS la noticia.
-2. NO COMPLEMENTES la información.
-3. TU MISIÓN es detectar:
-   - SESGO DE ENCUADRE: Cómo el autor intenta manipular la percepción del lector.
-   - CARGA EMOCIONAL: Palabras diseñadas para generar miedo, odio o alegría injustificada.
-   - FALACIAS LÓGICAS: Hombre de paja, falsa equivalencia, ataques ad hominem.
-   - UNILATERALIDAD: Presentar solo una cara de la moneda como si fuera la única.
+    const systemPrompt = `You are the VeritasAI Forensic Auditor v3.1. Your sole function is to audit media MANIPULATION.
+STRICT RULES:
+1. DO NOT summarize the news.
+2. DO NOT provide additional information.
+3. YOUR MISSION is to detect:
+   - FRAMING BIAS: How the author attempts to manipulate the reader's perception.
+   - EMOTIONAL TRIGGERS: Words designed to generate fear, hatred, or unjustified joy.
+   - LOGICAL FALLACIES: Straw man, false equivalence, ad hominem attacks.
+   - UNILATERALITY: Presenting only one side of the story as if it were the only one.
 
-El VeritasScore (0-100) es un TERMÓMETRO DE TOXICIDAD EDITORIAL:
-- 0-30: Neutral, fáctico, seguro.
-- 31-60: Sesgado, usa lenguaje cargado.
-- 61-100: Propaganda agresiva, manipulación cognitiva detectada.
+The VeritasScore (0-100) is an EDITORIAL TOXICITY THERMOMETER:
+- 0-30: Neutral, factual, safe.
+- 31-60: Biased, uses loaded language.
+- 61-100: Aggressive propaganda, cognitive manipulation detected.
+
+STRICT INSTRUCTION FOR LANGUAGE:
+- Respond in the SAME LANGUAGE as the article provided.
+- If the article is in English, all fields (explanation, summary_neutralized, title_neutralized) MUST be in English.
+- If the article is in Spanish, all fields MUST be in Spanish.
+- QUOTES must always be exact snippets from the original source text.
 
 STRICT INSTRUCTION FOR TECHNIQUES:
-- Use English standardized slugs for technique_slug (e.g., "loaded-language", "fear-mongering", "anchoring-bias", "false-dilemma", "moral-engineering", "ad-hominem", "cherry-picking", "framing-bias", "emotional-manipulation").
-
-IMPORTANT: Respond in the SAME LANGUAGE as the article provided (e.g., if the article is in English, respond in English. If it is in Spanish, respond in Spanish).`
+- Use English standardized slugs for technique_slug (e.g., "loaded-language", "fear-mongering", "anchoring-bias", "false-dilemma", "moral-engineering", "ad-hominem", "cherry-picking", "framing-bias", "emotional-manipulation").`
 
     let result;
     const userPrompt = `AUDITORÍA FORENSE OBLIGATORIA:
