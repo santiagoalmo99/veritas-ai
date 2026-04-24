@@ -82,10 +82,22 @@ export async function POST(req: Request) {
         const $ = cheerio.load(html)
         
         // Clean up unnecessary elements
-        $('script, style, nav, footer, header, aside, .ad, .advertisement, iframe').remove()
+        $('script, style, nav, footer, header, aside, .ad, .advertisement, iframe, .cookie-banner, #cookie-law-info-bar').remove()
         
         title = $('h1').first().text().trim() || $('title').text().trim()
-        content = $('p').map((i, el) => $(el).text().trim()).get().join('\n\n').substring(0, 10000)
+        
+        // Try specific article containers first, fallback to all paragraphs
+        let contentNodes = $('article p, main p, .article-body p, .entry-content p, .post-content p')
+        if (contentNodes.length === 0) {
+          contentNodes = $('p')
+        }
+        
+        content = contentNodes
+          .map((i, el) => $(el).text().trim())
+          .get()
+          .filter(text => text.length > 60 && !/cookies|suscríbete|boletines|derechos reservados|política de privacidad|términos y condiciones/i.test(text))
+          .join('\n\n')
+          .substring(0, 10000)
       }
     } catch (e) {
       console.warn('Scraper failed, using fallback from request body:', e)

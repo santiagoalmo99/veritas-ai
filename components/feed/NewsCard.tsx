@@ -11,6 +11,18 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { VeritasScore } from '@/components/score/VeritasScore'
 import { useI18n } from '@/lib/i18n'
 
+function decodeHtml(html: string) {
+  if (!html) return ''
+  return html
+    .replace(/&#(\d+);/g, (match, dec) => String.fromCharCode(dec))
+    .replace(/&quot;/g, '"')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&#039;/g, "'")
+    .replace(/&apos;/g, "'");
+}
+
 interface NewsCardProps {
   article: Article
   index?: number
@@ -83,16 +95,19 @@ export function NewsCard({ article, index = 0 }: NewsCardProps) {
                <span className="font-ui text-[0.65rem] font-bold tracking-widest uppercase text-[var(--color-text-secondary)]">
                  {article.analysisStatus === 'completed' 
                    ? (isEn ? 'Veritas AI Verdict' : 'Veredicto VeritasAI')
-                   : (isEn ? 'News Context' : 'Contexto de la Noticia')}
+                   : (isEn ? 'Forensic Pre-Analysis' : 'Pre-Análisis Forense')}
                </span>
             </div>
          </div>
          
          <div className="mb-4 pl-3 border-l-2 border-[var(--color-border)]">
-           <p className="font-ui text-sm text-[var(--color-text-primary)] leading-relaxed m-0">
+           <p className="font-ui text-sm text-[var(--color-text-primary)] leading-relaxed m-0 italic">
              {article.analysisStatus === 'completed' && article.summaryNeutralized
                ? article.summaryNeutralized
-               : article.excerpt}
+               : (isEn 
+                   ? `Preliminary scan indicates ${hasManipulation ? 'potential cognitive manipulation' : 'a mostly neutral narrative'} with a risk score of ${scoreValue}/100. ${article.excerpt ? `Context: ${article.excerpt}` : ''}`
+                   : `El escaneo preliminar indica ${hasManipulation ? 'posible manipulación cognitiva' : 'una narrativa mayormente neutral'} con un nivel de riesgo de ${scoreValue}/100. ${article.excerpt ? `Contexto base: ${article.excerpt}` : ''}`
+                 )}
            </p>
          </div>
 
@@ -168,9 +183,9 @@ export function NewsCard({ article, index = 0 }: NewsCardProps) {
           isHorizontal ? "text-xl sm:text-2xl" : "text-lg",
           isNeutralized ? "text-[var(--score-high-text)]" : "text-[var(--color-text-primary)]"
         )}>
-          {isNeutralized && article.titleNeutralized ? article.titleNeutralized : article.title}
+          {isNeutralized && article.titleNeutralized ? decodeHtml(article.titleNeutralized) : decodeHtml(article.title)}
         </h2>
-        {article.excerpt && <p className="font-ui text-sm text-[var(--color-text-secondary)] mb-2 line-clamp-3 leading-relaxed relative z-10">{article.excerpt}</p>}
+        {/* We moved the excerpt to the Pre-Analysis block so we can remove the redundant paragraph here, or keep it short. We'll remove it since the AnalysisBlock handles it now. */}
         <AnalysisBlock />
         
         <div className="flex items-center justify-between mt-auto pt-4 border-t border-[var(--color-border)] relative z-10">

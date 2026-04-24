@@ -1,7 +1,17 @@
 'use client'
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ChevronDown, BookOpen, Quote, Info } from 'lucide-react'
+import { ChevronDown, BookOpen, Quote, Info, AlertTriangle, Target, Brain, Zap, Megaphone, ShieldAlert, Eye } from 'lucide-react'
+
+const IconMap: Record<string, React.ReactNode> = {
+  'alert-triangle': <AlertTriangle size={20} />,
+  'target': <Target size={20} />,
+  'brain': <Brain size={20} />,
+  'zap': <Zap size={20} />,
+  'megaphone': <Megaphone size={20} />,
+  'shield-alert': <ShieldAlert size={20} />,
+  'eye': <Eye size={20} />,
+}
 import { cn } from '@/lib/utils'
 import { DetectedTechnique } from '@/lib/types'
 
@@ -27,7 +37,9 @@ export function TechniqueAccordion({ dt, index }: Props) {
             "w-10 h-10 rounded-xl flex items-center justify-center text-xl shadow-inner border border-[var(--color-border-soft)] transition-all",
             isOpen ? "bg-[var(--color-bg-base)] scale-110 rotate-3" : "bg-[var(--color-surface-2)]"
           )}>
-            {dt.technique.icon || '🎯'}
+            {typeof dt.technique.icon === 'string' && IconMap[dt.technique.icon] 
+              ? IconMap[dt.technique.icon] 
+              : <Target size={20} />}
           </div>
           <div className="space-y-0.5">
             <h4 className="text-[13px] font-display font-bold text-[var(--color-text-primary)] uppercase tracking-tight">
