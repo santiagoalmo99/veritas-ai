@@ -129,7 +129,7 @@ El VeritasScore (0-100) es un TERMÓMETRO DE TOXICIDAD EDITORIAL:
 - 61-100: Propaganda agresiva, manipulación cognitiva detectada.
 
 STRICT INSTRUCTION FOR TECHNIQUES:
-- Use English standardized slugs for `technique_slug` (e.g., "loaded-language", "fear-mongering", "anchoring-bias", "false-dilemma", "moral-engineering", "ad-hominem", "cherry-picking", "framing-bias", "emotional-manipulation").
+- Use English standardized slugs for technique_slug (e.g., "loaded-language", "fear-mongering", "anchoring-bias", "false-dilemma", "moral-engineering", "ad-hominem", "cherry-picking", "framing-bias", "emotional-manipulation").
 
 IMPORTANT: Respond in the SAME LANGUAGE as the article provided (e.g., if the article is in English, respond in English. If it is in Spanish, respond in Spanish).`
 
